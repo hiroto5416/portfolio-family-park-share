@@ -18,6 +18,7 @@
 ## 🔧 使用技術
 
 - フロントエンド
+
   - Next.js (最新の安定バージョン)
   - TypeScript
   - Tailwind CSS
@@ -37,5 +38,7 @@
 ## 🚀 ローカルでの開発環境構築
 
 1. リポジトリのクローン
+
 ```bash
 git clone https://github.com/hiroto5416/portfolio-family-park-share.git
+```

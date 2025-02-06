@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id              String           @id @default(uuid())
+  username        String           @unique @map("username")
+  avatarUrl       String?          @map("avatar_url")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at")
+  likes           Like[]
+  privacySettings PrivacySettings?
+  reviews         Review[]
+
+  @@map("profiles")
+}
+
+model Park {
+  id        String   @id @default(uuid())
+  placeId   String   @unique @map("place_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  reviews   Review[]
+
+  @@map("parks")
+}
+
+model Review {
+  id         String        @id @default(uuid())
+  parkId     String        @map("park_id")
+  userId     String        @map("user_id")
+  content    String
+  likesCount Int           @default(0) @map("likes_count")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @default(now()) @updatedAt @map("updated_at")
+  likes      Like[]
+  images     ReviewImage[]
+  park       Park          @relation(fields: [parkId], references: [id])
+  user       Profile       @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
+model ReviewImage {
+  id        String   @id @default(uuid())
+  reviewId  String   @map("review_id")
+  imageUrl  String   @map("image_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  review    Review   @relation(fields: [reviewId], references: [id])
+
+  @@map("review_images")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  reviewId  String   @map("review_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  review    Review   @relation(fields: [reviewId], references: [id])
+  user      Profile  @relation(fields: [userId], references: [id])
+
+  @@unique([reviewId, userId])
+  @@map("likes")
+}
+
+model PrivacySettings {
+  userId          String   @id @map("user_id")
+  locationEnabled Boolean  @default(false) @map("location_enabled")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+  user            Profile  @relation(fields: [userId], references: [id])
+
+  @@map("privacy_settings")
+}

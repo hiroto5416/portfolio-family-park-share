@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import animate from 'tailwindcss-animate';
 
 export default {
   darkMode: ['class'],
@@ -10,7 +11,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: 'hsl(var(--background))',
+        background: {
+          DEFAULT: '#FFFFFF',
+          secondary: '#F5F5F5',
+        },
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',
@@ -21,7 +25,9 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#2E7D32',
+          light: '#4CAF50',
+          dark: '#1B5E20',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
@@ -40,7 +46,7 @@ export default {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
-        border: 'hsl(var(--border))',
+        border: '#E0E0E0',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         chart: {
@@ -50,13 +56,21 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        text: {
+          primary: '#333333',
+          secondary: '#666666',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        card: '12px',
+      },
+      maxWidth: {
+        container: '1280px',
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [animate],
 } satisfies Config;

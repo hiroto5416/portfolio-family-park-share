@@ -42,7 +42,7 @@ export default function ParkDetailPage() {
       {/* 上部セクション: 写真と情報を横並びに */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* 左側: 公園写真 */}
-        <div className="order-2 md:order-1">
+        <div className="order-1 md:order-1">
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Camera className="h-5 w-5 text-muted-foreground" />
@@ -61,7 +61,7 @@ export default function ParkDetailPage() {
         </div>
 
         {/* 右側: 公園情報 */}
-        <div className="order-1 md:order-2">
+        <div className="order-2 md:order-2">
           <ParkDetail {...MOCK_PARK_DATA} />
         </div>
       </div>

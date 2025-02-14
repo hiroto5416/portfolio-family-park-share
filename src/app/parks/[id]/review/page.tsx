@@ -16,7 +16,7 @@ export default function ReviewPage() {
   };
 
   return (
-    <div className="container max-w-5xl mx-auto py-12 px-4">
+    <div className="container max-w-5xl mx-auto py-6 md:py-12 px-4">
       <ReviewForm parkName="中央公園" onSubmit={handleSubmit} onCancel={handleCancel} />
     </div>
   );

@@ -4,21 +4,19 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 
 interface SearchBarProps {
-  size?: "default" | "lg";
+  size?: 'default' | 'lg';
 }
 
-export function SearchBar({size = "default"}: SearchBarProps) {
+export function SearchBar({ size = 'default' }: SearchBarProps) {
   const inputClass = size === 'lg' ? 'h-12 text-lg' : 'h-9';
 
   return (
-    <div className='flex gap-2'>
-      <div className='relative flex-grow'>
-        <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'/>
-        <Input className={`${inputClass} pl-10`} placeholder='公園名・地域名で検索'/>
+    <div className="flex flex-col md:flex-row gap-2">
+      <div className="relative flex-grow">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Input className={`${inputClass} pl-10`} placeholder="公園名・地域名で検索" />
       </div>
-      <Button>
-        現在地から探す
-      </Button>
+      <Button className="w-full md:w-auto">現在地から探す</Button>
     </div>
-  )
+  );
 }

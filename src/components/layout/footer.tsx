@@ -26,23 +26,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* お問い合わせ */}
-          <div>
-            <h3 className="font-semibold mb-4">お問い合わせ</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/contact" className="text-text-secondary hover:text-primary">
-                  お問い合わせフォーム
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-text-secondary hover:text-primary">
-                  よくある質問
-                </Link>
-              </li>
-            </ul>
-          </div>
-
           {/* プライバシーと利用規約 */}
           <div>
             <h3 className="font-semibold mb-4">プライバシーと利用規約</h3>
@@ -72,13 +55,6 @@ export function Footer() {
             {
               title: 'サービスについて',
               links: [{ href: '/about', label: 'サービス概要' }],
-            },
-            {
-              title: 'お問い合わせ',
-              links: [
-                { href: '/contact', label: 'お問い合わせフォーム' },
-                { href: '/faq', label: 'よくある質問' },
-              ],
             },
             {
               title: 'プライバシーと利用規約',

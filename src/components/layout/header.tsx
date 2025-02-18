@@ -1,12 +1,23 @@
+'use client';
+
 import Link from 'next/link';
 import React from 'react';
 import { Button } from '../ui/button';
 // import { SearchBar } from '@/components/search-bar';
 import { Trees, LogIn, UserPlus } from 'lucide-react';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
+import { cn } from '@/lib/utils';
 
 export function Header() {
+  const isVisible = useScrollDirection();
+
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header
+      className={cn(
+        'border-b bg-white sticky top-0 z-50 transition-transform duration-300',
+        !isVisible && 'md:transform-none -translate-y-full'
+      )}
+    >
       <div className="max-w-container mx-auto px-4 h-16 flex items-center justify-between md:justify-start md:gap-8">
         {/* ロゴ */}
         <Link

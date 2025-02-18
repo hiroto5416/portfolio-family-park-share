@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { ParkDetail } from '@/features/park/components/ParkDetail';
 import { ParkReview } from '@/features/park/components/ParkReview';
 import { Card } from '@/components/ui/card';
@@ -6,6 +8,8 @@ import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
+
+const REVIEWS_PER_PAGE = 5;
 
 // ダミーデータ
 const MOCK_PARK_DATA = {
@@ -32,9 +36,89 @@ const MOCK_REVIEWS = [
     date: '2024-07-23',
     images: ['/placeholder-review3.jpg'],
   },
+  {
+    id: 3,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 4,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 5,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 6,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 7,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 8,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 9,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 10,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
+  {
+    id: 11,
+    username: '神宮寺',
+    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+    date: '2024-07-23',
+    images: ['/placeholder-review3.jpg'],
+  },
 ];
 
 export default function ParkDetailPage() {
+  // ページネーション用のステート
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 総ページ数を計算
+  const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
+
+  // 現在のページに表示するレビューの取得
+  const currentReviews = MOCK_REVIEWS.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
+  // ページ変更ハンドラー
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">{MOCK_PARK_DATA.name}</h1>
@@ -74,11 +158,49 @@ export default function ParkDetailPage() {
             <Link href={`/parks/${MOCK_PARK_DATA.id}/review`}>レビューを書く</Link>
           </Button>
         </div>
+
+        {/* レビュー一覧 */}
         <div className="space-y-4">
-          {MOCK_REVIEWS.map((review) => (
+          {currentReviews.map((review) => (
             <ParkReview key={review.id} {...review} />
           ))}
         </div>
+
+        {/* ページネーションUI */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              前へ
+            </Button>
+
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              次へ
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

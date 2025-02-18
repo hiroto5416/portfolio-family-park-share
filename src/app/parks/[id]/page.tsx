@@ -17,7 +17,7 @@ const MOCK_PARK_DATA = {
   name: '中央公園',
   address: '東京都新宿区西新宿',
   hours: '24時間',
-  facilities: ['遊具', 'ベンチ', 'トイレ'],
+  facilities: ['遊具', 'ベンチ', 'トイレ','駐車場', '災害支援サイン', '全天候型バーゴラ','シェルター','テーブルセット','水飲み'],
   images: ['/placeholder-park.jpg'],
 };
 
@@ -145,8 +145,10 @@ export default function ParkDetailPage() {
         </div>
 
         {/* 右側: 公園情報 */}
-        <div className="order-2 md:order-2">
-          <ParkDetail {...MOCK_PARK_DATA} />
+        <div className="order-2 md:order-2 h-full">
+          <div className='h-full max-h-[340px] overflow-auto'>
+            <ParkDetail {...MOCK_PARK_DATA} />
+          </div>
         </div>
       </div>
 

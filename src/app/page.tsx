@@ -33,11 +33,14 @@ export default function Home() {
             <div className="bg-green-50 p-3 border-b">
               <h3 className="text-lg font-medium text-green-800">近くの公園</h3>
             </div>
-            <ScrollArea className="h-[500px]">
+            <ScrollArea className="h-[450px]">
               <div className="p-4 space-y-4">
                 {[
                   { name: '中央公園', address: '東京都新宿区西新宿' },
                   { name: '浜町公園', address: '東京都新宿区西新宿' },
+                  { name: '代々木公園', address: '東京都新宿区西新宿' },
+                  { name: '代々木公園', address: '東京都新宿区西新宿' },
+                  { name: '代々木公園', address: '東京都新宿区西新宿' },
                   { name: '代々木公園', address: '東京都新宿区西新宿' },
                 ].map((park, index) => (
                   <div

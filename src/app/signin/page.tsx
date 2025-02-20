@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Trees } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -28,29 +27,22 @@ function SignInPage() {
   };
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        {/* ロゴ部分 */}
-        <div className="flex flex-col space-y-2 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <Trees className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">FAMILY PARK SHARE</h1>
-          </div>
-        </div>
-
+    <div className="flex h-[calc(100vh-4rem)] w-full flex-col items-center justify-start pt-12">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">
         {/* 登録フォーム */}
-        <Card>
-          <CardHeader>
-            <CardTitle>アカウント新規登録</CardTitle>
+        <Card className="border-2">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-center text-2xl">新規登録</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="">お名前</label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="font-bold" htmlFor="">
+                  お名前
+                </label>
                 <Input
                   id="username"
                   name="username"
-                  placeholder="山田 太郎"
                   type="text"
                   autoCapitalize="none"
                   autoComplete="name"
@@ -61,14 +53,13 @@ function SignInPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="email">
+              <div>
+                <label className="font-bold text-sm leading-none" htmlFor="email">
                   メールアドレス
                 </label>
                 <Input
                   id="email"
                   name="email"
-                  placeholder="tarou.yamada@example.com"
                   type="email"
                   autoCapitalize="none"
                   autoComplete="email"
@@ -79,8 +70,8 @@ function SignInPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="password">
+              <div>
+                <label className="font-bold text-sm leading-none" htmlFor="password">
                   パスワード
                 </label>
                 <Input
@@ -93,8 +84,8 @@ function SignInPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="confirmPassword">
+              <div>
+                <label className="text-sm font-bold leading-none" htmlFor="confirmPassword">
                   パスワード（確認）
                 </label>
                 <Input
@@ -107,11 +98,11 @@ function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full h-12 text-lg">
                 新規登録
               </Button>
 
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-6 text-center text-base">
                 すでにアカウントをお持ちの方は
                 <Link href="/login" className="text-primary hover:underline">
                   ログイン

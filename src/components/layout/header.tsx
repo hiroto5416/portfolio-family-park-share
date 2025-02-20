@@ -7,9 +7,14 @@ import { Button } from '../ui/button';
 import { Trees, LogIn, UserPlus } from 'lucide-react';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
   const isVisible = useScrollDirection();
+  const pathname = usePathname();
+
+  // ログインページと新規登録ページではボタンを非表示
+  const shouldShowAuthButtons = !['/login', '/signin'].includes(pathname);
 
   return (
     <header
@@ -29,29 +34,33 @@ export function Header() {
         </Link>
 
         {/* デスクトップメニュー */}
-        <div className="hidden md:flex items-center gap-4 ml-auto">
-          <Button variant="ghost" className="text-primary hover:text-primary/90">
-            <LogIn className="mr-1 h-4 w-4" />
-            ログイン
-          </Button>
-          <Button variant="default">
-            <UserPlus className="mr-1 h-4 w-4" />
-            新規登録
-          </Button>
-        </div>
+        {shouldShowAuthButtons && (
+          <div className="hidden md:flex items-center gap-4 ml-auto">
+            <Button variant="ghost" className="text-primary hover:text-primary/90">
+              <LogIn className="mr-1 h-4 w-4" />
+              ログイン
+            </Button>
+            <Button variant="default">
+              <UserPlus className="mr-1 h-4 w-4" />
+              新規登録
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* モバイル用ボタン */}
-      <div className="md:hidden flex justify-end gap-3 p-2">
-        <Button variant="ghost" className="text-xs h-7 px-2 text-primary hover:text-primary/90">
-          <LogIn className="mr-1 h-3 w-3" />
-          ログイン
-        </Button>
-        <Button variant="default" className="text-xs h-7 px-2">
-          <UserPlus className="mr-1 h-3 w-3" />
-          新規登録
-        </Button>
-      </div>
+      {shouldShowAuthButtons && (
+        <div className="md:hidden flex justify-end gap-3 p-2">
+          <Button variant="ghost" className="text-xs h-7 px-2 text-primary hover:text-primary/90">
+            <LogIn className="mr-1 h-3 w-3" />
+            ログイン
+          </Button>
+          <Button variant="default" className="text-xs h-7 px-2">
+            <UserPlus className="mr-1 h-3 w-3" />
+            新規登録
+          </Button>
+        </div>
+      )}
     </header>
   );
 }

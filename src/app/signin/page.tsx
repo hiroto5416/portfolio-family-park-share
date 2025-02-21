@@ -27,17 +27,17 @@ function SignInPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full flex-col items-center justify-start pt-12">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col items-center justify-start pt-6 md:pt-12">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 px-4 sm:w-[350px] md:w-[450px]">
         {/* 登録フォーム */}
         <Card className="border-2">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-center text-2xl">新規登録</CardTitle>
+            <CardTitle className="text-center md:text-2xl ms:test-xl">新規登録</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="font-bold" htmlFor="">
+                <label className="font-bold text-sm leading-none" htmlFor="">
                   お名前
                 </label>
                 <Input
@@ -98,7 +98,7 @@ function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 text-lg">
+              <Button type="submit" className="w-full h-12 md:text-lg sm:text-base">
                 新規登録
               </Button>
 

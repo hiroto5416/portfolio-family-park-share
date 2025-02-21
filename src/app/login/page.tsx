@@ -8,14 +8,14 @@ import React from 'react';
 
 export default function LoginPage() {
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full flex-col items-center justify-start pt-12">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col items-center justify-start pt-6 md:pt-12">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 px-4 sm:w-[350px] md:w-[450px]">
         <Card className="border-2">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-center text-2xl">ログイン</CardTitle>
+            <CardTitle className="font-bold text-center md:text-2xl sm:text-xl">ログイン</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div>
                 <label className="text-sm leading-none font-bold" htmlFor="email">
                   メールアドレス
@@ -35,7 +35,7 @@ export default function LoginPage() {
                 </label>
                 <Input id="password" type="password" className="h-12 text-lg" />
               </div>
-              <Button className="w-full h-12 text-lg">ログイン</Button>
+              <Button className="w-full h-12 md:text-lg sm:text-base">ログイン</Button>
             </div>
 
             <div className="mt-6 text-center text-base">

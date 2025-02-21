@@ -64,17 +64,39 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
             <Input type="file" accept="image/*" className="cursor-pointer" disabled={!isEditing} />
           </div>
 
-          <div className="flex justify-end gap-4 mt-6">
-            {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)}>変更</Button>
-            ) : (
-              <>
-                <Button variant="outline" onClick={handleCancel}>
-                  キャンセル
+          {/* ボタングループ */}
+          <div className="mt-6">
+            {/* モバイル表示用 */}
+            <div className="md:hidden space-y-2">
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)} className="w-full">
+                  変更
                 </Button>
-                <Button onClick={handleSave}>保存</Button>
-              </>
-            )}
+              ) : (
+                <>
+                  <Button onClick={handleSave} className="w-full">
+                    保存
+                  </Button>
+                  <Button variant="outline" onClick={handleCancel} className="w-full">
+                    キャンセル
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* デスクトップ表示用 */}
+            <div className="hidden md:flex justify-end gap-4">
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)}>変更</Button>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={handleCancel}>
+                    キャンセル
+                  </Button>
+                  <Button onClick={handleSave}>保存</Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </Card>

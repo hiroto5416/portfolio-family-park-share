@@ -7,7 +7,9 @@ import { Card } from '@/components/ui/card';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import Link from 'next/link';
+// import Link from 'next/link';
+// import { ReviewEditModal } from '@/features/mypage/components/ReviewEditModal';
+import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -17,7 +19,17 @@ const MOCK_PARK_DATA = {
   name: '中央公園',
   address: '東京都新宿区西新宿',
   hours: '24時間',
-  facilities: ['遊具', 'ベンチ', 'トイレ','駐車場', '災害支援サイン', '全天候型バーゴラ','シェルター','テーブルセット','水飲み'],
+  facilities: [
+    '遊具',
+    'ベンチ',
+    'トイレ',
+    '駐車場',
+    '災害支援サイン',
+    '全天候型バーゴラ',
+    'シェルター',
+    'テーブルセット',
+    '水飲み',
+  ],
   images: ['/placeholder-park.jpg'],
 };
 
@@ -102,8 +114,11 @@ const MOCK_REVIEWS = [
 ];
 
 export default function ParkDetailPage() {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   // ページネーション用のステート
   const [currentPage, setCurrentPage] = useState(1);
+  // const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
+  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // 総ページ数を計算
   const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
@@ -117,6 +132,11 @@ export default function ParkDetailPage() {
   // ページ変更ハンドラー
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleCreateReview = (content: string, images: File[]) => {
+    console.log('新規レビュー:', { content, images });
+    // ここで実際のレビュー投稿処理を実装
   };
 
   return (
@@ -146,7 +166,7 @@ export default function ParkDetailPage() {
 
         {/* 右側: 公園情報 */}
         <div className="order-2 md:order-2 h-full">
-          <div className='h-full max-h-[340px] overflow-auto'>
+          <div className="h-full max-h-[340px] overflow-auto">
             <ParkDetail {...MOCK_PARK_DATA} />
           </div>
         </div>
@@ -156,9 +176,7 @@ export default function ParkDetailPage() {
       <div className="mt-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">レビュー</h2>
-          <Button asChild>
-            <Link href={`/parks/${MOCK_PARK_DATA.id}/review`}>レビューを書く</Link>
-          </Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>レビューを書く</Button>
         </div>
 
         {/* レビュー一覧 */}
@@ -203,6 +221,13 @@ export default function ParkDetailPage() {
             </Button>
           </div>
         )}
+
+        <ReviewCreateModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          parkName={MOCK_PARK_DATA.name}
+          onSubmit={handleCreateReview}
+        />
       </div>
     </div>
   );

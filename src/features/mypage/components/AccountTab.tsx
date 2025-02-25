@@ -2,8 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import React, { useState } from 'react';
-import { UserProfile } from './types';
+import { UserProfile } from '@/types/user';
 import { User } from 'lucide-react';
+import { UserReviews } from './UserReviews';
 
 interface AccountTabProps {
   initialData: UserProfile;
@@ -12,6 +13,129 @@ interface AccountTabProps {
 export const AccountTab = ({ initialData }: AccountTabProps) => {
   const [formData, setFormData] = useState<UserProfile>(initialData);
   const [isEditing, setIsEditing] = useState(false);
+
+  const MOCK_REVIEWS = [
+    {
+      id: 1,
+      parkName: '代々木公園',
+      content: '広々としていて気持ちよかったです',
+      date: '2024-11-15',
+      likes: 5,
+      images: [],
+    },
+    {
+      id: 2,
+      parkName: '井の頭公園',
+      content: '池の周りの景色が綺麗でした',
+      date: '2024-10-10',
+      likes: 8,
+      images: [],
+    },
+    {
+      id: 3,
+      parkName: '昭和記念公園',
+      content: '家族でピクニックを楽しみました',
+      date: '2024-09-20',
+      likes: 6,
+      images: [],
+    },
+    {
+      id: 4,
+      parkName: '日比谷公園',
+      content: '静かで落ち着いた雰囲気が良かったです',
+      date: '2024-08-30',
+      likes: 4,
+      images: [],
+    },
+    {
+      id: 5,
+      parkName: '葛西臨海公園',
+      content: '観覧車からの景色が最高でした',
+      date: '2024-07-25',
+      likes: 9,
+      images: [],
+    },
+    {
+      id: 6,
+      parkName: '代々木公園',
+      content: 'ドッグランが広くて良かったです',
+      date: '2024-06-12',
+      likes: 7,
+      images: [],
+    },
+    {
+      id: 7,
+      parkName: '砧公園',
+      content: '子供向けの遊具が充実していました',
+      date: '2024-05-18',
+      likes: 3,
+      images: [],
+    },
+    {
+      id: 8,
+      parkName: '上野恩賜公園',
+      content: '動物園の後にのんびり過ごせました',
+      date: '2024-04-22',
+      likes: 6,
+      images: [],
+    },
+    {
+      id: 9,
+      parkName: '新宿御苑',
+      content: '桜がとても綺麗でした',
+      date: '2024-03-29',
+      likes: 10,
+      images: [],
+    },
+    {
+      id: 10,
+      parkName: '光が丘公園',
+      content: 'ジョギングコースが快適でした',
+      date: '2024-02-14',
+      likes: 5,
+      images: [],
+    },
+    {
+      id: 11,
+      parkName: '小金井公園',
+      content: 'バーベキューが楽しめました',
+      date: '2024-01-08',
+      likes: 8,
+      images: [],
+    },
+    {
+      id: 12,
+      parkName: '井の頭公園',
+      content: 'ボートに乗るのが楽しかったです',
+      date: '2023-12-24',
+      likes: 9,
+      images: [],
+    },
+    {
+      id: 13,
+      parkName: '等々力渓谷公園',
+      content: '都会とは思えない自然の豊かさでした',
+      date: '2023-11-11',
+      likes: 7,
+      images: [],
+    },
+    {
+      id: 14,
+      parkName: '砧公園',
+      content: '芝生が広くて子供が走り回れました',
+      date: '2023-10-05',
+      likes: 6,
+      images: [],
+    },
+    {
+      id: 15,
+      parkName: '清澄庭園',
+      content: '和風の庭園が美しく、癒されました',
+      date: '2023-09-21',
+      likes: 4,
+      images: [],
+    },
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -100,6 +224,7 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
           </div>
         </div>
       </Card>
+      <UserReviews reviews={MOCK_REVIEWS} />
     </div>
   );
 };

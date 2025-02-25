@@ -4,20 +4,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AccountTab } from '@/features/mypage/components/AccountTab';
 import { SettingsTab } from '@/features/mypage/components/SettingsTab';
 import React from 'react';
+import { UserProfile } from '@/types/user';
 
-const MOCK_USER_DATA = {
+const MOCK_USER_DATA: UserProfile = {
   username: '山田 太郎',
   email: 'tarou.yamada@example.com',
-  avatar: null
-}
+  avatar: null,
+};
 
 export default function MyPage() {
   return (
-    <div className='container max-w-4xl mx-auto py-8 px-4'>
-      <h1 className='text-2xl font-bold mb-6'>マイページ</h1>
+    <div className="container max-w-4xl mx-auto py-8 px-4">
+      <h1 className="text-2xl font-bold mb-6">マイページ</h1>
 
-      <Tabs defaultValue='account' className='space-y-6'>
-        <TabsList className='grid w-full grid-cols-2'>
+      <Tabs defaultValue="account" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="account">アカウント</TabsTrigger>
           <TabsTrigger value="settings">設定</TabsTrigger>
         </TabsList>

@@ -3,18 +3,23 @@
 import Link from 'next/link';
 import React from 'react';
 import { Button } from '../ui/button';
-// import { SearchBar } from '@/components/search-bar';
-import { Trees, LogIn, UserPlus } from 'lucide-react';
+import { Trees, LogIn, UserPlus, User, LogOut } from 'lucide-react';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 
 export function Header() {
   const isVisible = useScrollDirection();
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   // ログインページと新規登録ページではボタンを非表示
   const shouldShowAuthButtons = !['/login', '/signin'].includes(pathname);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: true, callbackUrl: '/' });
+  };
 
   return (
     <header
@@ -36,14 +41,35 @@ export function Header() {
         {/* デスクトップメニュー */}
         {shouldShowAuthButtons && (
           <div className="hidden md:flex items-center gap-4 ml-auto">
-            <Button variant="ghost" className="text-primary hover:text-primary/90">
-              <LogIn className="mr-1 h-4 w-4" />
-              ログイン
-            </Button>
-            <Button variant="default">
-              <UserPlus className="mr-1 h-4 w-4" />
-              新規登録
-            </Button>
+            {session ? (
+              <>
+                <Link href="/mypage">
+                  <Button variant="ghost" className="text-primary hover:text-primary/90">
+                    <User className="mr-1 h-4 w-4" />
+                    マイページ
+                  </Button>
+                </Link>
+                <Button variant="default" onClick={handleLogout}>
+                  <LogOut className="mr-1 h-4 w-4" />
+                  ログアウト
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" className="text-primary hover:text-primary/90">
+                    <LogIn className="mr-1 h-4 w-4" />
+                    ログイン
+                  </Button>
+                </Link>
+                <Link href="/signin">
+                  <Button variant="default">
+                    <UserPlus className="mr-1 h-4 w-4" />
+                    新規登録
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -51,14 +77,41 @@ export function Header() {
       {/* モバイル用ボタン */}
       {shouldShowAuthButtons && (
         <div className="md:hidden flex justify-end gap-3 p-2">
-          <Button variant="ghost" className="text-xs h-7 px-2 text-primary hover:text-primary/90">
-            <LogIn className="mr-1 h-3 w-3" />
-            ログイン
-          </Button>
-          <Button variant="default" className="text-xs h-7 px-2">
-            <UserPlus className="mr-1 h-3 w-3" />
-            新規登録
-          </Button>
+          {session ? (
+            <>
+              <Link href="/mypage">
+                <Button
+                  variant="ghost"
+                  className="text-xs h-7 px-2 text-primary hover:text-primary/90"
+                >
+                  <User className="mr-1 h-3 w-3" />
+                  マイページ
+                </Button>
+              </Link>
+              <Button variant="default" className="text-xs h-7 px-2" onClick={handleLogout}>
+                <LogOut className="mr-1 h-3 w-3" />
+                ログアウト
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  className="text-xs h-7 px-2 text-primary hover:text-primary/90"
+                >
+                  <LogIn className="mr-1 h-3 w-3" />
+                  ログイン
+                </Button>
+              </Link>
+              <Link href="/signin">
+                <Button variant="default" className="text-xs h-7 px-2">
+                  <UserPlus className="mr-1 h-3 w-3" />
+                  新規登録
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>

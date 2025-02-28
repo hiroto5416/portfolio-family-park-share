@@ -3,16 +3,31 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AccountTab } from '@/features/mypage/components/AccountTab';
 import { SettingsTab } from '@/features/mypage/components/SettingsTab';
-import React from 'react';
-import { UserProfile } from '@/types/user';
-
-const MOCK_USER_DATA: UserProfile = {
-  username: '山田 太郎',
-  email: 'tarou.yamada@example.com',
-  avatar: null,
-};
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function MyPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  // sessionからユーザー情報を取得
+  const userData = {
+    username: session?.user?.name || '',
+    email: session?.user?.email || '',
+    avatar: session?.user?.image || null,
+  };
+
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-2xl font-bold mb-6">マイページ</h1>
@@ -24,7 +39,7 @@ export default function MyPage() {
         </TabsList>
 
         <TabsContent value="account">
-          <AccountTab initialData={MOCK_USER_DATA} />
+          <AccountTab initialData={userData} />
         </TabsContent>
 
         <TabsContent value="settings">

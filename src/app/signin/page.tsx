@@ -4,19 +4,56 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
-function SignInPage() {
+export default function SignInPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-    console.log(formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    // パウスワード確認
+    if (formData.password !== formData.confirmPassword) {
+      setError('パスワードが一致しません');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '登録に失敗しました');
+      }
+
+      // 登録成功後、ログインページへリダイレクト
+      router.push('/login');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '登録に失敗しました');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,6 +72,7 @@ function SignInPage() {
             <CardTitle className="text-center md:text-2xl ms:test-xl">新規登録</CardTitle>
           </CardHeader>
           <CardContent>
+            {error && <div className="mb-4 text-sm text-red-500">{error}</div>}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="font-bold text-sm leading-none" htmlFor="">
@@ -98,8 +136,12 @@ function SignInPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full h-12 md:text-lg sm:text-base">
-                新規登録
+              <Button
+                type="submit"
+                className="w-full h-12 md:text-lg sm:text-base"
+                disabled={isLoading}
+              >
+                {isLoading ? '登録中...' : '新規登録'}
               </Button>
 
               <div className="mt-6 text-center text-base">
@@ -115,5 +157,3 @@ function SignInPage() {
     </div>
   );
 }
-
-export default SignInPage;

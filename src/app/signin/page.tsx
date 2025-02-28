@@ -23,6 +23,14 @@ export default function SignInPage() {
     setError('');
     setIsLoading(true);
 
+    // パスワードバリデーション
+    const validation = validatePassword(formData.password);
+    if (!validation.isValid) {
+      setError(validation.error);
+      setIsLoading(false);
+      return;
+    }
+
     // パウスワード確認
     if (formData.password !== formData.confirmPassword) {
       setError('パスワードが一致しません');
@@ -61,6 +69,26 @@ export default function SignInPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const validatePassword = (password: string): { isValid: boolean; error: string } => {
+    // 長さチェック（８〜３２文字）
+    if (password.length < 8 || password.length > 32) {
+      return {
+        isValid: false,
+        error: 'パスワードは８文字以上３２文字以下で入力してください',
+      };
+    }
+
+    // 数字を含むかチェック
+    if (!/\d/.test(password)) {
+      return {
+        isValid: false,
+        error: 'パスワードには最低一つの数字を含めてください',
+      };
+    }
+
+    return { isValid: true, error: '' };
   };
 
   return (

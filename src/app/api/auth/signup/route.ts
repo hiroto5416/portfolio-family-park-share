@@ -12,6 +12,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '必須項目が入力されていません' }, { status: 400 });
     }
 
+    // パスワードチェック
+    if (password.length < 8 || password.length > 32) {
+      return NextResponse.json(
+        { error: 'パスワードは８文字以上３２文字以下で入力してください' },
+        { status: 400 }
+      );
+    }
+
+    // 数字を含むかチェック
+    if (!/\d/.test(password)) {
+      return NextResponse.json(
+        { error: 'パスワードには最低１つの数字を含めてください' },
+        { status: 400 }
+      );
+    }
+
     // メールアドレスの重複チェック
     const existingUser = await prisma.user.findUnique({
       where: { email },

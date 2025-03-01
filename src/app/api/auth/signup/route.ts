@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     // パスワードのハッシュ化
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // ユーザー作成
+    // ユーザーの作成
     const user = await prisma.user.create({
       data: {
         name: username,
@@ -52,8 +52,9 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'ユーザー登録に失敗しました' }, { status: 500 });
+    return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } });
+  } catch (error) {
+    console.error('Signup error:', error instanceof Error ? error.message : 'Unknown error');
+    return NextResponse.json({ error: '登録に失敗しました' }, { status: 500 });
   }
 }

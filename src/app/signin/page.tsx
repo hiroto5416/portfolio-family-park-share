@@ -4,11 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { signIn } from 'next-auth/react';
 
 export default function SignInPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -23,22 +22,22 @@ export default function SignInPage() {
     setError('');
     setIsLoading(true);
 
-    // パスワードバリデーション
-    const validation = validatePassword(formData.password);
-    if (!validation.isValid) {
-      setError(validation.error);
-      setIsLoading(false);
-      return;
-    }
-
-    // パウスワード確認
-    if (formData.password !== formData.confirmPassword) {
-      setError('パスワードが一致しません');
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      // パスワードバリデーション
+      const validation = validatePassword(formData.password);
+      if (!validation.isValid) {
+        setError(validation.error);
+        setIsLoading(false);
+        return;
+      }
+
+      // パスワード確認
+      if (formData.password !== formData.confirmPassword) {
+        setError('パスワードが一致しません');
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,8 +54,18 @@ export default function SignInPage() {
         throw new Error(data.error || '登録に失敗しました');
       }
 
-      // 登録成功後、ログインページへリダイレクト
-      router.push('/login');
+      // 登録成功後の処理
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        throw new Error('ログインに失敗しました');
+      }
+
+      window.location.href = '/';
     } catch (error) {
       setError(error instanceof Error ? error.message : '登録に失敗しました');
     } finally {

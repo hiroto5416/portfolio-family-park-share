@@ -1,18 +1,28 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import React, { useState } from 'react';
-import { UserProfile } from '@/types/user';
 import { User } from 'lucide-react';
 import { UserReviews } from './UserReviews';
+import { useRouter } from 'next/navigation';
 
 interface AccountTabProps {
-  initialData: UserProfile;
+  initialData: {
+    username: string;
+    email: string;
+  };
 }
 
-export const AccountTab = ({ initialData }: AccountTabProps) => {
-  const [formData, setFormData] = useState<UserProfile>(initialData);
-  const [isEditing, setIsEditing] = useState(false);
+export function AccountTab({ initialData }: AccountTabProps) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    username: initialData.username,
+  });
 
   const MOCK_REVIEWS = [
     {
@@ -144,18 +154,109 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
     });
   };
 
-  const handleCancel = () => {
-    setFormData(initialData);
-    setIsEditing(false);
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch('/api/user/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: formData.username }),
+      });
+
+      if (!response.ok) {
+        throw new Error('プロフィールの更新に失敗しました');
+      }
+
+      setSuccess('プロフィールを更新しました');
+      router.refresh();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '更新に失敗しました');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSave = () => {
-    console.log('保存されたデータ:', formData);
-    setIsEditing(false);
-  };
+  // const handlePasswordChange = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   setError('');
+  //   setSuccess('');
+
+  //   // 新しいパスワードの一致確認
+  //   // if (formData.newPassword !== formData.confirmNewPassword) {
+  //   //   setError('新しいパスワードが一致しません');
+  //   //   setIsLoading(false);
+  //   //   return;
+  //   // }
+
+  //   // // パスワードバリデーション
+  //   // const validation = validatePassword(formData.newPassword);
+  //   // if (!validation.isValid) {
+  //   //   setError(validation.error);
+  //   //   setIsLoading(false);
+  //   //   return;
+  //   // }
+
+  //   try {
+  //     const response = await fetch('/api/user/change-password', {
+  //       method: 'PUT',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       // body: JSON.stringify({
+  //       //   currentPassword: formData.currentPassword,
+  //       //   newPassword: formData.newPassword,
+  //       // }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.error || 'パスワードの更新に失敗しました');
+  //     }
+
+  //     setSuccess('パスワードを更新しました');
+  //     // フォームをリセット
+  //     setFormData({
+  //       ...formData,
+  //       // currentPassword: '',
+  //       // newPassword: '',
+  //       // confirmNewPassword: '',
+  //     });
+  //   } catch (error) {
+  //     setError(error instanceof Error ? error.message : '更新に失敗しました');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // const validatePassword = (password: string): { isValid: boolean; error: string } => {
+  //   // 長さチェック（8-32文字）
+  //   if (password.length < 8 || password.length > 32) {
+  //     return {
+  //       isValid: false,
+  //       error: 'パスワードは8文字以上32文字以下で入力してください',
+  //     };
+  //   }
+
+  //   // 数字を含むかチェック
+  //   if (!/\d/.test(password)) {
+  //     return {
+  //       isValid: false,
+  //       error: 'パスワードには最低1つの数字を含めてください',
+  //     };
+  //   }
+
+  //   return { isValid: true, error: '' };
+  // };
 
   return (
     <div className="space-y-6">
+      {error && <div className="text-red-500 text-sm">{error}</div>}
+      {success && <div className="text-green-500 text-sm">{success}</div>}
+
       <Card className="p-6">
         <div className="flex items-center space-x-4 mb-6">
           <User className="h-5 w-5 text-muted-foreground" />
@@ -168,7 +269,7 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              disabled={!isEditing}
+              disabled={!isLoading}
             />
           </div>
 
@@ -177,31 +278,31 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
             <Input
               name="email"
               type="email"
-              value={formData.email}
+              value={initialData.email}
               onChange={handleChange}
-              disabled={!isEditing}
+              disabled={!isLoading}
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">プロフィール画像</label>
-            <Input type="file" accept="image/*" className="cursor-pointer" disabled={!isEditing} />
+            <Input type="file" accept="image/*" className="cursor-pointer" disabled={!isLoading} />
           </div>
 
           {/* ボタングループ */}
           <div className="mt-6">
             {/* モバイル表示用 */}
             <div className="md:hidden space-y-2">
-              {!isEditing ? (
-                <Button onClick={() => setIsEditing(true)} className="w-full">
+              {!isLoading ? (
+                <Button onClick={() => setIsLoading(true)} className="w-full">
                   変更
                 </Button>
               ) : (
                 <>
-                  <Button onClick={handleSave} className="w-full">
+                  <Button onClick={handleProfileUpdate} className="w-full">
                     保存
                   </Button>
-                  <Button variant="outline" onClick={handleCancel} className="w-full">
+                  <Button variant="outline" onClick={() => setIsLoading(false)} className="w-full">
                     キャンセル
                   </Button>
                 </>
@@ -210,14 +311,14 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
 
             {/* デスクトップ表示用 */}
             <div className="hidden md:flex justify-end gap-4">
-              {!isEditing ? (
-                <Button onClick={() => setIsEditing(true)}>変更</Button>
+              {!isLoading ? (
+                <Button onClick={() => setIsLoading(true)}>変更</Button>
               ) : (
                 <>
-                  <Button variant="outline" onClick={handleCancel}>
+                  <Button variant="outline" onClick={() => setIsLoading(false)}>
                     キャンセル
                   </Button>
-                  <Button onClick={handleSave}>保存</Button>
+                  <Button onClick={handleProfileUpdate}>保存</Button>
                 </>
               )}
             </div>
@@ -227,4 +328,4 @@ export const AccountTab = ({ initialData }: AccountTabProps) => {
       <UserReviews reviews={MOCK_REVIEWS} />
     </div>
   );
-};
+}

@@ -1,19 +1,44 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+interface PlaceResult {
+  name: string;
+  vicinity: string;
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
+  };
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const lat = searchParams.get('lat');
+  const lng = searchParams.get('lng');
+
+  if (!lat || !lng) {
+    return NextResponse.json({ error: '位置情報が必要です' }, { status: 400 });
+  }
+
   try {
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
-        `location=35.6812362,139.7671248&` + // 東京駅の座標
-        `radius=1000&` +
+        `location=${lat},${lng}&` +
+        `radius=5000&` +
         `type=park&` +
-        `language=ja&` + // 日本語の結果を取得
+        `language=ja&` +
         `key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
     );
 
     const data = await response.json();
-    console.log(data);
-    return NextResponse.json(data);
+
+    const parks = data.results.map((result: PlaceResult) => ({
+      name: result.name,
+      vicinity: result.vicinity,
+      location: result.geometry.location,
+    }));
+
+    return NextResponse.json({ parks: parks.slice(0, 5) });
   } catch (error) {
     console.error('Error fetching places:', error);
     return NextResponse.json({ error: 'Failed to fetch places' }, { status: 500 });

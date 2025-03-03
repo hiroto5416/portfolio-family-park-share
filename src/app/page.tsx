@@ -1,4 +1,5 @@
 import { Hero } from '@/components/hero';
+import { GoogleMapComponent } from '@/components/map/GoogleMap';
 import { Avatar } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,9 +19,7 @@ export default function Home() {
             <h2 className="text-xl font-semibold mb-4">近くの公園を探す</h2>
           </div>
           <Card className="h-[500px] shadow-lg">
-            <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
-              <p className="text-muted-foreground">地図がここに表示されます</p>
-            </div>
+            <GoogleMapComponent />
           </Card>
         </div>
 

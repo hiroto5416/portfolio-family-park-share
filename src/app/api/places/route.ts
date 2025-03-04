@@ -9,6 +9,11 @@ interface PlaceResult {
       lng: number;
     };
   };
+  photos?: {
+    photo_reference: string;
+    height: number;
+    width: number;
+  }[];
 }
 
 export async function GET(request: Request) {
@@ -36,6 +41,12 @@ export async function GET(request: Request) {
       name: result.name,
       vicinity: result.vicinity,
       location: result.geometry.location,
+      photos:
+        result.photos?.map((photo) => ({
+          photo_reference: photo.photo_reference,
+          height: photo.height,
+          width: photo.width,
+        })) || [],
     }));
 
     return NextResponse.json({ parks: parks.slice(0, 5) });

@@ -1,6 +1,6 @@
 import { Hero } from '@/components/hero';
 import { GoogleMapComponent } from '@/components/map/GoogleMap';
-import { Avatar } from '@/components/ui/avatar';
+import { ParkList } from '@/components/park-list';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 // import { ParkList } from '@/components/park-list';
@@ -33,28 +33,8 @@ export default function Home() {
               <h3 className="text-lg font-medium text-green-800">近くの公園</h3>
             </div>
             <ScrollArea className="h-[450px]">
-              <div className="p-4 space-y-4">
-                {[
-                  { name: '中央公園', address: '東京都新宿区西新宿' },
-                  { name: '浜町公園', address: '東京都新宿区西新宿' },
-                  { name: '代々木公園', address: '東京都新宿区西新宿' },
-                  { name: '代々木公園', address: '東京都新宿区西新宿' },
-                  { name: '代々木公園', address: '東京都新宿区西新宿' },
-                  { name: '代々木公園', address: '東京都新宿区西新宿' },
-                ].map((park, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Avatar className="h-16 w-16 rounded-md">
-                      <span className="sr-only">Park image</span>
-                    </Avatar>
-                    <div>
-                      <h4 className="font-medium text-gray-900">{park.name}</h4>
-                      <p className="text-sm text-gray-500">{park.address}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="p-4">
+                <ParkList />
               </div>
             </ScrollArea>
           </Card>

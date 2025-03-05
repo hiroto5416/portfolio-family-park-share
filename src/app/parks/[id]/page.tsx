@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ParkDetail } from '@/features/park/components/ParkDetail';
 import { ParkReview } from '@/features/park/components/ParkReview';
 import { Card } from '@/components/ui/card';
@@ -10,28 +10,42 @@ import Image from 'next/image';
 // import Link from 'next/link';
 // import { ReviewEditModal } from '@/features/mypage/components/ReviewEditModal';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
+import { useParams } from 'next/navigation';
 
 const REVIEWS_PER_PAGE = 5;
 
+interface ParkData {
+  name: string;
+  images: string[];
+  address: string;
+  hours: string;
+  facilities: string[];
+  photos: {
+    photo_reference: string;
+    height: number;
+    width: number;
+  }[];
+}
+
 // ダミーデータ
-const MOCK_PARK_DATA = {
-  id: '1',
-  name: '中央公園',
-  address: '東京都新宿区西新宿',
-  hours: '24時間',
-  facilities: [
-    '遊具',
-    'ベンチ',
-    'トイレ',
-    '駐車場',
-    '災害支援サイン',
-    '全天候型バーゴラ',
-    'シェルター',
-    'テーブルセット',
-    '水飲み',
-  ],
-  images: ['/placeholder-park.jpg'],
-};
+// const parkData = {
+//   id: '1',
+//   name: '中央公園',
+//   address: '東京都新宿区西新宿',
+//   hours: '24時間',
+//   facilities: [
+//     '遊具',
+//     'ベンチ',
+//     'トイレ',
+//     '駐車場',
+//     '災害支援サイン',
+//     '全天候型バーゴラ',
+//     'シェルター',
+//     'テーブルセット',
+//     '水飲み',
+//   ],
+//   images: ['/placeholder-park.jpg'],
+// };
 
 const MOCK_REVIEWS = [
   {
@@ -114,6 +128,12 @@ const MOCK_REVIEWS = [
 ];
 
 export default function ParkDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const [parkData, setParkData] = useState<ParkData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   // ページネーション用のステート
   const [currentPage, setCurrentPage] = useState(1);
@@ -139,9 +159,72 @@ export default function ParkDetailPage() {
     // ここで実際のレビュー投稿処理を実装
   };
 
+  useEffect(() => {
+    const fetchParkData = async () => {
+      if (!id) {
+        console.error('ID is undefined:', params);
+        setError('公園IDが見つかりません');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        console.log('Fetching park with ID:', id);
+        const response = await fetch(`/api/parks/${id}`);
+
+        if (!response.ok) {
+          throw new Error(`APIエラー: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Received park data:', data);
+
+        if (data.error) {
+          setError(data.error);
+        } else {
+          setParkData(data.park);
+        }
+      } catch (err) {
+        console.error('Error fetching park:', err);
+        setError('公園情報の取得に失敗しました');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParkData();
+  }, [id, params]);
+
+  // ローディング状態の表示を改善
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg">読み込み中...</div>
+      </div>
+    );
+  }
+
+  // エラー表示を改善
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg text-red-500">エラー: {error}</div>
+      </div>
+    );
+  }
+
+  // データが存在しない場合の表示を改善
+  if (!parkData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg">公園が見つかりませんでした</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">{MOCK_PARK_DATA.name}</h1>
+      <h1 className="text-3xl font-bold mb-6">{parkData.name}</h1>
 
       {/* 上部セクション: 写真と情報を横並びに */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -154,11 +237,13 @@ export default function ParkDetailPage() {
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px]">
               <Image
-                src={MOCK_PARK_DATA.images[0]}
-                alt={MOCK_PARK_DATA.name}
+                loader={({ src }) => src}
+                src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
+                alt={parkData.name}
                 className="object-cover w-full h-full"
-                width={10}
-                height={10}
+                width={400}
+                height={300}
+                unoptimized
               />
             </div>
           </Card>
@@ -167,7 +252,7 @@ export default function ParkDetailPage() {
         {/* 右側: 公園情報 */}
         <div className="order-2 md:order-2 h-full">
           <div className="h-full max-h-[340px] overflow-auto">
-            <ParkDetail {...MOCK_PARK_DATA} />
+            <ParkDetail {...parkData} />
           </div>
         </div>
       </div>
@@ -225,7 +310,7 @@ export default function ParkDetailPage() {
         <ReviewCreateModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          parkName={MOCK_PARK_DATA.name}
+          parkName={parkData.name}
           onSubmit={handleCreateReview}
         />
       </div>

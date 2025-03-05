@@ -1,10 +1,24 @@
 export interface Park {
+  // place_id: string;
+  // name: string;
+  // vicinity: string;
+  // location: {
+  //   lat: number;
+  //   lng: number;
+  // };
+  // photos?: {
+  //   photo_reference: string;
+  //   height: number;
+  //   width: number;
+  // }[];
+  place_id: string;
   name: string;
   vicinity: string;
-  place_id: string;
-  location: {
-    lat: number;
-    lng: number;
+  geometry: {
+    location: {
+      lat: number;
+      lng: number;
+    };
   };
   photos?: {
     photo_reference: string;

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Park } from '@/types/park';
+import Link from 'next/link';
 
 // 画像ローダーを定義することで、外部URLでもNext.js Imageコンポーネントを使用できるようにする
 const googlePlacesLoader = ({ src }: { src: string }) => {
@@ -76,38 +77,41 @@ export function ParkList() {
         const parkId = park.place_id || `park-${index}`;
         const hasImageError = imageErrors[parkId];
         const photoReference = park.photos?.[0]?.photo_reference;
-        
+
         // 参照IDのデバッグ (開発環境のみ)
         if (process.env.NODE_ENV === 'development' && photoReference) {
           console.log(`Park ${park.name} photo ref: ${photoReference.substring(0, 15)}...`);
         }
 
+        console.log('Park data:', park);
         return (
-          <div
-            key={parkId}
-            className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0"
-          >
-            <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
-              {photoReference && !hasImageError ? (
-                <Image
-                  loader={googlePlacesLoader}
-                  src={getPhotoUrl(photoReference)}
-                  alt={park.name}
-                  width={64}
-                  height={64}
-                  className="object-cover h-full w-full"
-                  onError={() => handleImageError(parkId)}
-                  unoptimized // 重要: Next.jsの最適化をバイパスして元の画像を表示
-                />
-              ) : (
-                <span className="text-xs text-gray-500">No Image</span>
-              )}
+          <Link href={`/parks/${encodeURIComponent(park.place_id) || ''}`} key={parkId} passHref>
+            <div
+              className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0"
+              onClick={() => console.log('Clicked park:', park, 'ID:', park.place_id)}
+            >
+              <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                {photoReference && !hasImageError ? (
+                  <Image
+                    loader={googlePlacesLoader}
+                    src={getPhotoUrl(photoReference)}
+                    alt={park.name}
+                    width={64}
+                    height={64}
+                    className="object-cover h-full w-full"
+                    onError={() => handleImageError(parkId)}
+                    unoptimized // 重要: Next.jsの最適化をバイパスして元の画像を表示
+                  />
+                ) : (
+                  <span className="text-xs text-gray-500">No Image</span>
+                )}
+              </div>
+              <div className="flex-grow min-w-0">
+                <h4 className="font-medium text-gray-900 truncate">{park.name}</h4>
+                <p className="text-sm text-gray-500 truncate">{park.vicinity}</p>
+              </div>
             </div>
-            <div className="flex-grow min-w-0">
-              <h4 className="font-medium text-gray-900 truncate">{park.name}</h4>
-              <p className="text-sm text-gray-500 truncate">{park.vicinity}</p>
-            </div>
-          </div>
+          </Link>
         );
       })}
     </div>

@@ -25,6 +25,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: '公園が見つかりませんでした' }, { status: 404 });
     }
 
+    console.log('Business status from API:', data.result.business_status);
     return NextResponse.json({
       park: {
         id: data.result.place_id,
@@ -32,6 +33,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
         address: data.result.formatted_address,
         photos: data.result.photos,
         hours: data.result.opening_hours?.weekday_text || '24時間',
+        types: data.result.types || [],
+        businessStatus:
+          data.result.business_status || data.result.operational_status || 'OPERATIONAL',
         facilities: [], // 後で実装
       },
     });

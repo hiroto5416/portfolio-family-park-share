@@ -25,6 +25,7 @@ interface ParkData {
     height: number;
     width: number;
   }[];
+  businessStatus: string;
 }
 
 // ダミーデータ
@@ -235,16 +236,18 @@ export default function ParkDetailPage() {
               <Camera className="h-5 w-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">公園写真</p>
             </div>
-            <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px]">
-              <Image
-                loader={({ src }) => src}
-                src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
-                alt={parkData.name}
-                className="object-cover w-full h-full"
-                width={400}
-                height={300}
-                unoptimized
-              />
+            <div className="flex justify-center">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] max-w-fit">
+                <Image
+                  loader={({ src }) => src}
+                  src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
+                  alt={parkData.name}
+                  className="object-cover"
+                  width={533}
+                  height={400}
+                  unoptimized
+                />
+              </div>
             </div>
           </Card>
         </div>
@@ -252,7 +255,14 @@ export default function ParkDetailPage() {
         {/* 右側: 公園情報 */}
         <div className="order-2 md:order-2 h-full">
           <div className="h-full max-h-[340px] overflow-auto">
-            <ParkDetail {...parkData} />
+            <ParkDetail
+              name={parkData.name}
+              address={parkData.address}
+              hours={parkData.hours}
+              facilities={parkData.facilities}
+              images={parkData.images}
+              businessStatus={parkData.businessStatus}
+            />
           </div>
         </div>
       </div>

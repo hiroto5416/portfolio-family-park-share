@@ -1,14 +1,20 @@
 import { prisma } from '@/lib/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import NextAuth from 'next-auth';
+import NextAuth, { AuthOptions, DefaultSession } from 'next-auth';
 import bcrypt from 'bcryptjs';
 
-// NextAuthの設定オグジェクト作成
-const handler = NextAuth({
-  // Prismaアダプターの設定(NextAuthがユーザー情報をデータベースに保存・取得するための設定)
+// セッションのユーザー型を拡張
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession['user'];
+  }
+}
+
+export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
-  // 認証プロバイダーの設定(どのような認証方法を使うかを指定。今回はメール/パスワード認証を設定)
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -45,15 +51,22 @@ const handler = NextAuth({
       },
     }),
   ],
-  // セッション設定（ユーザーログイン状態をJWTトークンで管理する設定）
   session: {
     strategy: 'jwt',
   },
-  // ページ設定（ログインページのURLを指定）
   pages: {
     signIn: '/login',
   },
-});
+  callbacks: {
+    session: ({ session, token }) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: token.sub,
+      },
+    }),
+  },
+};
 
-// エクスポート（APIルートがGETとPOSTリクエストに応答できるようにエクスポートする）
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

@@ -155,9 +155,34 @@ export default function ParkDetailPage() {
     setCurrentPage(pageNumber);
   };
 
-  const handleCreateReview = (content: string, images: File[]) => {
-    console.log('新規レビュー:', { content, images });
-    // ここで実際のレビュー投稿処理を実装
+  const handleCreateReview = async (content: string, images: File[]) => {
+    try {
+      const formData = new FormData();
+      formData.append('content', content);
+      formData.append('parkId', id);
+
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
+
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'レビューの投稿に失敗しました');
+      }
+
+      setIsCreateModalOpen(false);
+      // TODO: レビュー一覧の再取得処理
+
+    } catch (error) {
+      console.error('レビュー投稿エラー:', error);
+      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
+    }
   };
 
   useEffect(() => {

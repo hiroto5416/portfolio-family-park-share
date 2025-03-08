@@ -161,10 +161,6 @@ export default function ParkDetailPage() {
       formData.append('content', content);
       formData.append('parkId', id);
 
-      images.forEach((image) => {
-        formData.append('images', image);
-      });
-
       const response = await fetch('/api/reviews', {
         method: 'POST',
         body: formData,
@@ -177,8 +173,8 @@ export default function ParkDetailPage() {
       }
 
       setIsCreateModalOpen(false);
-      // TODO: レビュー一覧の再取得処理
-
+      // TODO: 成功時の処理を追加
+      // 例: レビュー一覧の再取得など
     } catch (error) {
       console.error('レビュー投稿エラー:', error);
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');

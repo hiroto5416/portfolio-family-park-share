@@ -9,6 +9,7 @@ interface ReviewCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   parkName: string;
+  parkId: string;
   onSubmit: (content: string, images: File[]) => void;
 }
 
@@ -70,9 +71,19 @@ export function ReviewCreateModal({ isOpen, onClose, parkName, onSubmit }: Revie
     }
   };
 
-  const handleSubmit = () => {
-    onSubmit(content, images);
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      if (!content.trim()) {
+        alert('レビュー内容を入力してください');
+        return;
+      }
+
+      await onSubmit(content, images);
+      onClose();
+    } catch (error) {
+      console.error('投稿エラー:', error);
+      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
+    }
   };
 
   return (

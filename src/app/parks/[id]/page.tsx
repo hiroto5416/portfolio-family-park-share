@@ -10,7 +10,8 @@ import Image from 'next/image';
 // import Link from 'next/link';
 // import { ReviewEditModal } from '@/features/mypage/components/ReviewEditModal';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -27,26 +28,6 @@ interface ParkData {
   }[];
   businessStatus: string;
 }
-
-// ダミーデータ
-// const parkData = {
-//   id: '1',
-//   name: '中央公園',
-//   address: '東京都新宿区西新宿',
-//   hours: '24時間',
-//   facilities: [
-//     '遊具',
-//     'ベンチ',
-//     'トイレ',
-//     '駐車場',
-//     '災害支援サイン',
-//     '全天候型バーゴラ',
-//     'シェルター',
-//     'テーブルセット',
-//     '水飲み',
-//   ],
-//   images: ['/placeholder-park.jpg'],
-// };
 
 const MOCK_REVIEWS = [
   {
@@ -141,6 +122,11 @@ export default function ParkDetailPage() {
   // const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
   // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const supabase = createClientComponentClient();
+  const router = useRouter();
+
   // 総ページ数を計算
   const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
 
@@ -155,26 +141,95 @@ export default function ParkDetailPage() {
     setCurrentPage(pageNumber);
   };
 
-  const handleCreateReview = async (content: string, images: File[]) => {
-    try {
-      const formData = new FormData();
-      formData.append('content', content);
-      formData.append('parkId', id);
+  // 認証状態を確認
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
+        console.log('認証セッション', session);
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error('認証確認エラー:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // 認証状態の変更を監視
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  const handleCreateReview = async (content: string, images: File[]) => {
+    if (!isAuthenticated) {
+      alert('レビューを投稿するにはログインが必要です');
+      router.push('/login'); // ログインページへリダイレクト
+      return;
+    }
+
+    try {
       const response = await fetch('/api/reviews', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: content,
+          parkId: id,
+        }),
+        credentials: 'include',
       });
 
-      const data = await response.json();
+      // レスポンスの内容をログに出力（デバッグ用）
+      const responseText = await response.text();
+      console.log('APIレスポンス:', responseText);
+
+      // テキストをJSONに戻す
+      const data = responseText ? JSON.parse(responseText) : {};
 
       if (!response.ok) {
-        throw new Error(data.error || 'レビューの投稿に失敗しました');
+        throw new Error(data.error || `エラー: ${response.status}`);
       }
+
+      // ステータスコードによる分岐処理
+      if (!response.ok) {
+        // 応答が成功でない場合のエラーハンドリング
+        let errorMessage = `レビューの投稿に失敗しました (${response.status})`;
+
+        try {
+          // JSONとして解析できる場合はエラーメッセージを取得
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (jsonError) {
+          // JSONとして解析できない場合はデフォルトメッセージを使用
+          console.error('応答のJSONパースに失敗:', jsonError);
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      // レスポンスが正常な場合のみJSONをパース
+      // const data = await response.json();
 
       setIsCreateModalOpen(false);
       // TODO: 成功時の処理を追加
       // 例: レビュー一覧の再取得など
+      // 成功メッセージを表示
+      alert('レビューを投稿しました');
     } catch (error) {
       console.error('レビュー投稿エラー:', error);
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
@@ -218,7 +273,7 @@ export default function ParkDetailPage() {
   }, [id, params]);
 
   // ローディング状態の表示を改善
-  if (loading) {
+  if (loading || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-lg">読み込み中...</div>
@@ -342,6 +397,7 @@ export default function ParkDetailPage() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           parkName={parkData.name}
+          parkId={id}
           onSubmit={handleCreateReview}
         />
       </div>

@@ -22,7 +22,9 @@ model Profile {
 
 model Park {
   id        String   @id @default(uuid())
-  placeId   String   @unique @map("place_id")
+  place_id  String   @unique @map("place_id")
+  name      String
+  address   String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   reviews   Review[]

@@ -41,7 +41,6 @@ export function GoogleMapComponent() {
         },
         () => {
           // 取得失敗時
-          console.error('位置情報の取得に失敗しました');
           // デフォルトの位置（東京駅）
           setCurrentLocation({
             lat: 35.6812362,
@@ -64,7 +63,7 @@ export function GoogleMapComponent() {
       const data = await response.json();
       setParks(data.parks);
     } catch (error) {
-      console.error('公園の取得に失敗しました:', error);
+      // 公園の取得に失敗しました:
     }
   }, [currentLocation]);
 

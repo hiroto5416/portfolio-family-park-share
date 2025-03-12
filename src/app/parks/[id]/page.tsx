@@ -11,7 +11,7 @@ import Image from 'next/image';
 // import { ReviewEditModal } from '@/features/mypage/components/ReviewEditModal';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
 import { useParams, useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSession } from 'next-auth/react';
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -27,6 +27,20 @@ interface ParkData {
     width: number;
   }[];
   businessStatus: string;
+}
+
+// APIレスポンスの型を定義
+interface ApiResponse {
+  success?: boolean;
+  review?: {
+    id: string;
+    content: string;
+    parkId: string;
+    userId: string;
+    createdAt: string;
+  };
+  error?: string;
+  details?: string;
 }
 
 const MOCK_REVIEWS = [
@@ -112,129 +126,14 @@ const MOCK_REVIEWS = [
 export default function ParkDetailPage() {
   const params = useParams();
   const id = params?.id as string;
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const [parkData, setParkData] = useState<ParkData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  // ページネーション用のステート
   const [currentPage, setCurrentPage] = useState(1);
-  // const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
-  // const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const supabase = createClientComponentClient();
-  const router = useRouter();
-
-  // 総ページ数を計算
-  const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
-
-  // 現在のページに表示するレビューの取得
-  const currentReviews = MOCK_REVIEWS.slice(
-    (currentPage - 1) * REVIEWS_PER_PAGE,
-    currentPage * REVIEWS_PER_PAGE
-  );
-
-  // ページ変更ハンドラー
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-
-  // 認証状態を確認
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        console.log('認証セッション', session);
-        setIsAuthenticated(!!session);
-      } catch (error) {
-        console.error('認証確認エラー:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    // 認証状態の変更を監視
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase.auth]);
-
-  const handleCreateReview = async (content: string, images: File[]) => {
-    if (!isAuthenticated) {
-      alert('レビューを投稿するにはログインが必要です');
-      router.push('/login'); // ログインページへリダイレクト
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: content,
-          parkId: id,
-        }),
-        credentials: 'include',
-      });
-
-      // レスポンスの内容をログに出力（デバッグ用）
-      const responseText = await response.text();
-      console.log('APIレスポンス:', responseText);
-
-      // テキストをJSONに戻す
-      const data = responseText ? JSON.parse(responseText) : {};
-
-      if (!response.ok) {
-        throw new Error(data.error || `エラー: ${response.status}`);
-      }
-
-      // ステータスコードによる分岐処理
-      if (!response.ok) {
-        // 応答が成功でない場合のエラーハンドリング
-        let errorMessage = `レビューの投稿に失敗しました (${response.status})`;
-
-        try {
-          // JSONとして解析できる場合はエラーメッセージを取得
-          const errorData = await response.json();
-          if (errorData && errorData.error) {
-            errorMessage = errorData.error;
-          }
-        } catch (jsonError) {
-          // JSONとして解析できない場合はデフォルトメッセージを使用
-          console.error('応答のJSONパースに失敗:', jsonError);
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      // レスポンスが正常な場合のみJSONをパース
-      // const data = await response.json();
-
-      setIsCreateModalOpen(false);
-      // TODO: 成功時の処理を追加
-      // 例: レビュー一覧の再取得など
-      // 成功メッセージを表示
-      alert('レビューを投稿しました');
-    } catch (error) {
-      console.error('レビュー投稿エラー:', error);
-      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
-    }
-  };
 
   useEffect(() => {
     const fetchParkData = async () => {
@@ -254,15 +153,50 @@ export default function ParkDetailPage() {
         }
 
         const data = await response.json();
-        console.log('Received park data:', data);
 
-        if (data.error) {
-          setError(data.error);
-        } else {
-          setParkData(data.park);
+        // 公園データをデータベースに保存
+        // const saveResponse = await fetch('/api/parks', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({
+        //     place_id: id,
+        //     name: data.park.name,
+        //     address: data.park.address || '',
+        //   }),
+        // });
+        // const saveResponse = await fetch('/api/parks', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({
+        //     placeId: id,  // place_id から placeId に変更
+        //     name: data.park.name,
+        //     address: data.park.address || '',
+        //   }),
+        // });
+
+        const saveResponse = await fetch('/api/parks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            place_id: id, // placeIdではなくplace_idを使用
+            name: data.park.name,
+            address: data.park.address || '',
+          }),
+        });
+
+        if (!saveResponse.ok) {
+          console.error('公園データの保存に失敗:', await saveResponse.text());
         }
-      } catch (err) {
-        console.error('Error fetching park:', err);
+
+        setParkData(data.park);
+      } catch (error) {
+        console.error('Error:', error);
         setError('公園情報の取得に失敗しました');
       } finally {
         setLoading(false);
@@ -272,8 +206,8 @@ export default function ParkDetailPage() {
     fetchParkData();
   }, [id, params]);
 
-  // ローディング状態の表示を改善
-  if (loading || isLoading) {
+  // ローディング状態の表示
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-lg">読み込み中...</div>
@@ -299,6 +233,86 @@ export default function ParkDetailPage() {
     );
   }
 
+  // 総ページ数を計算
+  const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
+
+  // 現在のページに表示するレビューの取得
+  const currentReviews = MOCK_REVIEWS.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
+  // ページ変更ハンドラー
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleCreateReview = async (content: string, images: File[]) => {
+    if (!session) {
+      alert('レビューを投稿するにはログインが必要です');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      // リクエストの前にデータをログに出力して確認
+      console.log('送信するデータ:', { content, parkId: id });
+
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content,
+          parkId: id,
+        }),
+      });
+
+      // ステータスコードをログに記録
+      console.log('レスポンスステータス:', response.status);
+
+      // レスポンス処理の改善
+      let data: ApiResponse = {}; // 型を明示的に指定
+      let responseText = '';
+
+      try {
+        responseText = await response.text();
+        console.log('生のレスポンス:', responseText);
+
+        if (responseText) {
+          data = JSON.parse(responseText) as ApiResponse; // 型アサーションを追加
+        }
+      } catch (parseError) {
+        console.error('JSONパースエラー:', parseError);
+        console.error('パース対象のテキスト:', responseText);
+        alert('サーバーからの応答を解析できませんでした');
+        return;
+      }
+
+      if (!response.ok) {
+        const errorMessage = data.error || data.details || `エラー: ${response.status}`;
+        console.error('APIエラー:', errorMessage, data);
+        alert(errorMessage);
+        return;
+      }
+
+      // 成功時の処理
+      setIsCreateModalOpen(false);
+      alert('レビューを投稿しました');
+      router.refresh();
+    } catch (error) {
+      // より詳細なエラーログ
+      console.error('レビュー投稿エラー:', error);
+      if (error instanceof Error) {
+        console.error('エラータイプ:', error.name);
+        console.error('エラーメッセージ:', error.message);
+        console.error('スタックトレース:', error.stack);
+      }
+
+      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
+    }
+  };
   return (
     <div className="container max-w-5xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">{parkData.name}</h1>

@@ -26,8 +26,7 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
       return new File([convertedBuffer], file.name.replace('.heic', '.jpg'), {
         type: 'image/jpeg',
       });
-    } catch (error) {
-      console.error('HEIC変換エラー:', error);
+    } catch {
       throw new Error('画像の変換に失敗しました');
     }
   }
@@ -81,7 +80,6 @@ export function ReviewCreateModal({ isOpen, onClose, parkName, onSubmit }: Revie
       await onSubmit(content, images);
       onClose();
     } catch (error) {
-      console.error('投稿エラー:', error);
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
     }
   };

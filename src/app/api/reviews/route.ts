@@ -1,137 +1,123 @@
+import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { randomUUID } from 'crypto';
+import { prisma } from '@/lib/prisma';
+import { authOptions } from '../auth/[...nextauth]/route';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: Request) {
-  console.log('--------- レビュー投稿API実行開始 ---------');
-
+  console.log('===== レビュー投稿API開始 =====');
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    // セッション情報を取得
+    const session = await getServerSession(authOptions);
+    console.log('セッション情報:', JSON.stringify(session, null, 2));
 
-    // ログインユーザーの取得
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
-      return NextResponse.json(
-        {
-          error: 'ログインが必要です',
-          details: sessionError?.message,
-        },
-        { status: 401 }
-      );
+    if (!session?.user?.email) {
+      console.log('エラー: ログインされていません');
+      return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    // リクエストボディを取得
     const { content, parkId } = await request.json();
+    console.log('受信したデータ:', { content, parkId });
 
-    // リクエストデータの取得
-    console.log('受信データ:', { content, parkId });
+    // 公園データを検索
+    const park = await prisma.park.findFirst({
+      where: {
+        OR: [{ place_id: parkId }, { id: parkId }],
+      },
+    });
 
-    if (!content || !parkId) {
-      return NextResponse.json(
-        {
-          error: 'レビュー内容と公園IDが必要です',
-        },
-        { status: 400 }
-      );
+    if (!park) {
+      console.log('公園が見つかりません:', parkId);
+      return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
     }
 
-    // ステップ1: 公園データの確認と作成
-    console.log('公園データを確認中...');
-    const { data: existingPark, error: parkCheckError } = await supabase
-      .from('parks')
-      .select('id')
-      .eq('place_id', parkId)
-      .maybeSingle();
+    // データベース内のユーザー一覧を確認
+    const allUsers = await prisma.user.findMany({
+      take: 10, // 最初の10件だけ取得
+    });
+    console.log('データベースのユーザー一覧:', JSON.stringify(allUsers, null, 2));
 
-    if (parkCheckError) {
-      console.error('公園データ確認エラー:', parkCheckError);
-      return NextResponse.json(
-        {
-          error: '公園データの確認に失敗しました',
-          details: parkCheckError.message,
-        },
-        { status: 500 }
-      );
-    }
+    // ユーザーを検索
+    let user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
 
-    // 公園のUUID
-    let parkUUID;
+    // ユーザーが存在しない場合は作成
+    if (!user) {
+      console.log('ユーザーが存在しないため作成します:', session.user.email);
+      try {
+        // パスワードはダミー値を設定（実際の認証はNextAuthで行われるため）
+        const hashedPassword = await bcrypt.hash('dummyPassword', 10);
 
-    if (!existingPark) {
-      // 公園が存在しない場合は新規作成
-      console.log('公園データが存在しないため作成します');
-      parkUUID = randomUUID();
-
-      const { error: createParkError } = await supabase.from('parks').insert({
-        id: parkUUID,
-        place_id: parkId,
-        // 最低限必要なその他のフィールド
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-
-      if (createParkError) {
-        console.error('公園データ作成エラー:', createParkError);
-        return NextResponse.json(
-          {
-            error: '公園データの作成に失敗しました',
-            details: createParkError.message,
+        user = await prisma.user.create({
+          data: {
+            email: session.user.email,
+            name: session.user.name || session.user.email.split('@')[0],
+            password: hashedPassword,
           },
-          { status: 500 }
-        );
+        });
+        console.log('ユーザー作成成功:', user);
+      } catch (userCreateError) {
+        console.error('ユーザー作成エラー:', userCreateError);
+        return NextResponse.json({ error: 'ユーザーの作成に失敗しました' }, { status: 500 });
       }
+    }
 
-      console.log('公園データを作成しました:', parkUUID);
-    } else {
-      // 既存の公園IDを使用
-      parkUUID = existingPark.id;
-      console.log('既存の公園データを使用します:', parkUUID);
+    // プロフィール一覧の確認
+    const allProfiles = await prisma.profile.findMany({
+      take: 10, // 最初の10件だけ取得
+    });
+    console.log('データベースのプロフィール一覧:', JSON.stringify(allProfiles, null, 2));
+
+    // ユーザーに対応するプロフィールを検索
+    let profile = await prisma.profile.findFirst({
+      where: { username: user.email },
+    });
+
+    // プロフィールが存在しない場合は作成
+    if (!profile) {
+      console.log('プロフィールが存在しないため作成します:', user.email);
+      try {
+        profile = await prisma.profile.create({
+          data: {
+            username: user.email,
+            // 他の必須フィールドがあれば追加
+          },
+        });
+        console.log('プロフィール作成成功:', profile);
+      } catch (profileCreateError) {
+        console.error('プロフィール作成エラー:', profileCreateError);
+        return NextResponse.json({ error: 'プロフィールの作成に失敗しました' }, { status: 500 });
+      }
     }
 
     // レビューの作成
-    const reviewId = randomUUID();
-    const { data: reviewData, error: reviewError } = await supabase
-      .from('reviews')
-      .insert({
-        id: reviewId,
-        park_id: parkUUID,
-        user_id: userId,
-        content: content,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select();
-
-    if (reviewError) {
-      console.error('レビュー作成エラー:', reviewError);
-      return NextResponse.json(
-        {
-          error: 'レビューの作成に失敗しました',
-          details: reviewError.message,
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log('レビューの作成に成功しました:', reviewId);
-    return NextResponse.json({
-      success: true,
-      message: 'レビューを投稿しました',
-      review: reviewData,
+    const review = await prisma.review.create({
+      data: {
+        content,
+        parkId: park.id,
+        userId: profile.id, // ProfileのIDを使用
+      },
     });
+
+    console.log('レビュー作成成功:', review);
+    return NextResponse.json({ success: true, review });
   } catch (error) {
-    console.error('全体エラー:', error);
+    // エラーの詳細ログ
+    console.error('===== レビュー作成エラー =====');
+    console.error('エラータイプ:', error instanceof Error ? error.name : typeof error);
+    console.error('エラーメッセージ:', error instanceof Error ? error.message : String(error));
+    console.error('スタックトレース:', error instanceof Error ? error.stack : '不明');
+
     return NextResponse.json(
       {
-        error: 'レビュー投稿処理中にエラーが発生しました',
+        error: 'レビューの作成に失敗しました',
         details: error instanceof Error ? error.message : '不明なエラー',
       },
       { status: 500 }
     );
+  } finally {
+    console.log('===== レビュー投稿API終了 =====');
   }
 }

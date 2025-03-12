@@ -32,7 +32,6 @@ export function ParkList() {
           if (data.error) {
             setError(data.error);
           } else {
-            console.log('取得した公園データ:', data.parks);
             setParks(data.parks);
           }
         } catch (err) {
@@ -78,17 +77,10 @@ export function ParkList() {
         const hasImageError = imageErrors[parkId];
         const photoReference = park.photos?.[0]?.photo_reference;
 
-        // 参照IDのデバッグ (開発環境のみ)
-        if (process.env.NODE_ENV === 'development' && photoReference) {
-          console.log(`Park ${park.name} photo ref: ${photoReference.substring(0, 15)}...`);
-        }
-
-        console.log('Park data:', park);
         return (
           <Link href={`/parks/${encodeURIComponent(park.place_id) || ''}`} key={parkId} passHref>
             <div
               className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0"
-              onClick={() => console.log('Clicked park:', park, 'ID:', park.place_id)}
             >
               <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
                 {photoReference && !hasImageError ? (

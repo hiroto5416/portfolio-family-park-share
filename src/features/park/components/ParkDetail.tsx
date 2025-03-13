@@ -70,8 +70,6 @@ export const ParkDetail: React.FC<PardDetailProps> = ({
 
   // 営業状況の日本語表示
   const getBusinessStatus = (status: string) => {
-    // デバッグ用にステータスを出力
-    console.log('Business status received:', status);
 
     const statusMap: { [key: string]: string } = {
       OPERATIONAL: '営業中',
@@ -83,13 +81,11 @@ export const ParkDetail: React.FC<PardDetailProps> = ({
 
     // statusが存在しない場合は'不明'を返す
     if (!status) {
-      console.log('Status is undefined or null');
       return '不明';
     }
 
     // statusMapに該当する値があればその値を、なければ'不明'を返す
     const mappedStatus = statusMap[status];
-    console.log('Mapped status:', mappedStatus);
 
     return mappedStatus || '不明';
   };

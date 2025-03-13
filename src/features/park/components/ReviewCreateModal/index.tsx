@@ -10,7 +10,7 @@ interface ReviewCreateModalProps {
   onClose: () => void;
   parkName: string;
   parkId: string;
-  onSubmit: (content: string, images: File[]) => void;
+  onSubmit: (content: string, images: File[], formData: FormData) => Promise<void>;
 }
 
 const convertHeicToJpeg = async (file: File): Promise<File> => {
@@ -33,7 +33,13 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
   return file;
 };
 
-export function ReviewCreateModal({ isOpen, onClose, parkName, onSubmit }: ReviewCreateModalProps) {
+export function ReviewCreateModal({
+  isOpen,
+  onClose,
+  parkName,
+  parkId,
+  onSubmit,
+}: ReviewCreateModalProps) {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [charCount, setCharCount] = useState(0);
@@ -77,7 +83,15 @@ export function ReviewCreateModal({ isOpen, onClose, parkName, onSubmit }: Revie
         return;
       }
 
-      await onSubmit(content, images);
+      const formData = new FormData();
+      formData.append('content', content);
+      formData.append('parkId', parkId);
+
+      images.forEach((image) => {
+        formData.append('images', image);
+      });
+
+      await onSubmit(content, images, formData);
       onClose();
     } catch (error) {
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');

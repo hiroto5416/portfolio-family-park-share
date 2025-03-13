@@ -3,22 +3,22 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '../auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
+import { uploadReviewImages } from '@/lib/uploadImage';
 
 export async function POST(request: Request) {
   console.log('===== レビュー投稿API開始 =====');
   try {
-    // セッション情報を取得
-    const session = await getServerSession(authOptions);
-    console.log('セッション情報:', JSON.stringify(session, null, 2));
+    const formData = await request.formData();
+    const content = formData.get('content') as string;
+    const parkId = formData.get('parkId') as string;
+    const imageFiles = formData.getAll('images');
 
+    console.log('受信したデータ:', { content, parkId, imageCount: imageFiles.length });
+
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      console.log('エラー: ログインされていません');
       return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
     }
-
-    // リクエストボディを取得
-    const { content, parkId } = await request.json();
-    console.log('受信したデータ:', { content, parkId });
 
     // 公園データを検索
     const park = await prisma.park.findFirst({
@@ -97,26 +97,26 @@ export async function POST(request: Request) {
       data: {
         content,
         parkId: park.id,
-        userId: profile.id, // ProfileのIDを使用
+        userId: profile.id,
       },
     });
 
-    console.log('レビュー作成成功:', review);
+    // 画像のアップロードと保存
+    if (imageFiles.length > 0) {
+      const imageUrls = await uploadReviewImages(imageFiles as File[], review.id);
+
+      await prisma.reviewImage.createMany({
+        data: imageUrls.map((url) => ({
+          reviewId: review.id,
+          imageUrl: url,
+        })),
+      });
+    }
+
     return NextResponse.json({ success: true, review });
   } catch (error) {
-    // エラーの詳細ログ
-    console.error('===== レビュー作成エラー =====');
-    console.error('エラータイプ:', error instanceof Error ? error.name : typeof error);
-    console.error('エラーメッセージ:', error instanceof Error ? error.message : String(error));
-    console.error('スタックトレース:', error instanceof Error ? error.stack : '不明');
-
-    return NextResponse.json(
-      {
-        error: 'レビューの作成に失敗しました',
-        details: error instanceof Error ? error.message : '不明なエラー',
-      },
-      { status: 500 }
-    );
+    console.error('レビュー作成エラー:', error);
+    return NextResponse.json({ error: 'レビューの作成に失敗しました' }, { status: 500 });
   } finally {
     console.log('===== レビュー投稿API終了 =====');
   }

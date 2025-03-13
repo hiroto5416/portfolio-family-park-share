@@ -30,18 +30,18 @@ interface ParkData {
 }
 
 // APIレスポンスの型を定義
-interface ApiResponse {
-  success?: boolean;
-  review?: {
-    id: string;
-    content: string;
-    parkId: string;
-    userId: string;
-    createdAt: string;
-  };
-  error?: string;
-  details?: string;
-}
+// interface ApiResponse {
+//   success?: boolean;
+//   review?: {
+//     id: string;
+//     content: string;
+//     parkId: string;
+//     userId: string;
+//     createdAt: string;
+//   };
+//   error?: string;
+//   details?: string;
+// }
 
 const MOCK_REVIEWS = [
   {
@@ -247,7 +247,7 @@ export default function ParkDetailPage() {
     setCurrentPage(pageNumber);
   };
 
-  const handleCreateReview = async (content: string, images: File[]) => {
+  const handleCreateReview = async (content: string, images: File[], formData: FormData) => {
     if (!session) {
       alert('レビューを投稿するにはログインが必要です');
       router.push('/login');
@@ -255,61 +255,21 @@ export default function ParkDetailPage() {
     }
 
     try {
-      // リクエストの前にデータをログに出力して確認
-      console.log('送信するデータ:', { content, parkId: id });
-
       const response = await fetch('/api/reviews', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content,
-          parkId: id,
-        }),
+        body: formData, // FormDataをそのまま送信
       });
 
-      // ステータスコードをログに記録
-      console.log('レスポンスステータス:', response.status);
-
-      // レスポンス処理の改善
-      let data: ApiResponse = {}; // 型を明示的に指定
-      let responseText = '';
-
-      try {
-        responseText = await response.text();
-        console.log('生のレスポンス:', responseText);
-
-        if (responseText) {
-          data = JSON.parse(responseText) as ApiResponse; // 型アサーションを追加
-        }
-      } catch (parseError) {
-        console.error('JSONパースエラー:', parseError);
-        console.error('パース対象のテキスト:', responseText);
-        alert('サーバーからの応答を解析できませんでした');
-        return;
-      }
-
       if (!response.ok) {
-        const errorMessage = data.error || data.details || `エラー: ${response.status}`;
-        console.error('APIエラー:', errorMessage, data);
-        alert(errorMessage);
-        return;
+        const data = await response.json();
+        throw new Error(data.error || 'レビューの投稿に失敗しました');
       }
 
-      // 成功時の処理
       setIsCreateModalOpen(false);
       alert('レビューを投稿しました');
       router.refresh();
     } catch (error) {
-      // より詳細なエラーログ
       console.error('レビュー投稿エラー:', error);
-      if (error instanceof Error) {
-        console.error('エラータイプ:', error.name);
-        console.error('エラーメッセージ:', error.message);
-        console.error('スタックトレース:', error.stack);
-      }
-
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
     }
   };

@@ -7,8 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-// import Link from 'next/link';
-// import { ReviewEditModal } from '@/features/mypage/components/ReviewEditModal';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -29,6 +27,19 @@ interface ParkData {
   businessStatus: string;
 }
 
+interface Review {
+  id: string;
+  content: string;
+  created_at: string;
+  likes_count: number;
+  profiles: {
+    username: string;
+  };
+  review_images: {
+    image_url: string;
+  }[];
+}
+
 // APIレスポンスの型を定義
 // interface ApiResponse {
 //   success?: boolean;
@@ -43,97 +54,132 @@ interface ParkData {
 //   details?: string;
 // }
 
-const MOCK_REVIEWS = [
-  {
-    id: 1,
-    username: 'たなか',
-    content: 'とても広くて子供が喜んでいました！',
-    date: '2025-01-12',
-    images: ['/placeholder-review1.jpg', '/placeholder-review2.jpg'],
-  },
-  {
-    id: 2,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 3,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 4,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 5,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 6,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 7,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 8,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 9,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 10,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-  {
-    id: 11,
-    username: '神宮寺',
-    content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-    date: '2024-07-23',
-    images: ['/placeholder-review3.jpg'],
-  },
-];
+// const MOCK_REVIEWS = [
+//   {
+//     id: 1,
+//     username: 'たなか',
+//     content: 'とても広くて子供が喜んでいました！',
+//     date: '2025-01-12',
+//     images: ['/placeholder-review1.jpg', '/placeholder-review2.jpg'],
+//   },
+//   {
+//     id: 2,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 3,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 4,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 5,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 6,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 7,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 8,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 9,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 10,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+//   {
+//     id: 11,
+//     username: '神宮寺',
+//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
+//     date: '2024-07-23',
+//     images: ['/placeholder-review3.jpg'],
+//   },
+// ];
 
 export default function ParkDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const { data: session } = useSession();
   const router = useRouter();
-
   const [parkData, setParkData] = useState<ParkData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+
+  const fetchReviews = async () => {
+    if (!id) return;
+
+    setIsLoadingReviews(true);
+    setReviewError(null);
+
+    try {
+      console.log('Fetching reviews for park:', id);
+      const response = await fetch(`/api/parks/${id}/reviews`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('レビュー取得サーバーエラー:', response.status, errorText);
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          throw new Error(errorJson.error || 'レビューの取得に失敗しました');
+        } catch (e) {
+          throw new Error(`レビューの取得に失敗しました (${response.status})`);
+        }
+      }
+
+      const data = await response.json();
+      console.log('取得したレビューデータ:', data);
+      setReviews(data.reviews || []);
+    } catch (error) {
+      console.error('レビュー取得エラー:', error);
+      setReviewError(error instanceof Error ? error.message : '不明なエラー');
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
 
   useEffect(() => {
     const fetchParkData = async () => {
@@ -204,6 +250,7 @@ export default function ParkDetailPage() {
     };
 
     fetchParkData();
+    fetchReviews();
   }, [id, params]);
 
   // ローディング状態の表示
@@ -234,10 +281,10 @@ export default function ParkDetailPage() {
   }
 
   // 総ページ数を計算
-  const totalPages = Math.ceil(MOCK_REVIEWS.length / REVIEWS_PER_PAGE);
+  const totalPages = Math.ceil(reviews.length / REVIEWS_PER_PAGE);
 
   // 現在のページに表示するレビューの取得
-  const currentReviews = MOCK_REVIEWS.slice(
+  const currentReviews = reviews.slice(
     (currentPage - 1) * REVIEWS_PER_PAGE,
     currentPage * REVIEWS_PER_PAGE
   );
@@ -324,47 +371,76 @@ export default function ParkDetailPage() {
           <Button onClick={() => setIsCreateModalOpen(true)}>レビューを書く</Button>
         </div>
 
-        {/* レビュー一覧 */}
-        <div className="space-y-4">
-          {currentReviews.map((review) => (
-            <ParkReview key={review.id} {...review} />
-          ))}
-        </div>
-
-        {/* ページネーションUI */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              前へ
-            </Button>
-
-            <div className="flex gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              次へ
-            </Button>
+        {/* レビュー取得エラー表示 */}
+        {reviewError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+            <p>{reviewError}</p>
           </div>
+        )}
+
+        {/* レビュー読み込み中 */}
+        {isLoadingReviews ? (
+          <div className="text-center py-8">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+            <p className="mt-2">レビューを読み込み中...</p>
+          </div>
+        ) : (
+          <>
+            {/* レビュー一覧 */}
+            {currentReviews.length > 0 ? (
+              <div className="space-y-4">
+                {currentReviews.map((review) => (
+                  <ParkReview
+                    key={review.id}
+                    username={review.profiles.username}
+                    content={review.content}
+                    date={review.created_at}
+                    images={review.review_images.map((img) => img.image_url)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                まだレビューがありません。最初のレビューを投稿してみましょう！
+              </div>
+            )}
+
+            {/* ページネーションUI */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  前へ
+                </Button>
+
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  次へ
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         <ReviewCreateModal

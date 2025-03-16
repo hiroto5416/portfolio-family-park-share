@@ -6,7 +6,6 @@ import { ParkReview } from '@/features/park/components/ParkReview';
 import { Card } from '@/components/ui/card';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -40,100 +39,6 @@ interface Review {
   }[];
 }
 
-// APIレスポンスの型を定義
-// interface ApiResponse {
-//   success?: boolean;
-//   review?: {
-//     id: string;
-//     content: string;
-//     parkId: string;
-//     userId: string;
-//     createdAt: string;
-//   };
-//   error?: string;
-//   details?: string;
-// }
-
-// const MOCK_REVIEWS = [
-//   {
-//     id: 1,
-//     username: 'たなか',
-//     content: 'とても広くて子供が喜んでいました！',
-//     date: '2025-01-12',
-//     images: ['/placeholder-review1.jpg', '/placeholder-review2.jpg'],
-//   },
-//   {
-//     id: 2,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 3,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 4,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 5,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 6,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 7,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 8,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 9,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 10,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-//   {
-//     id: 11,
-//     username: '神宮寺',
-//     content: '日影が多くて休憩できる場所も充実していて良かった。\nまた行きたいです!',
-//     date: '2024-07-23',
-//     images: ['/placeholder-review3.jpg'],
-//   },
-// ];
-
 export default function ParkDetailPage() {
   const params = useParams();
   const id = params?.id as string;
@@ -165,13 +70,13 @@ export default function ParkDetailPage() {
         try {
           const errorJson = JSON.parse(errorText);
           throw new Error(errorJson.error || 'レビューの取得に失敗しました');
-        } catch (e) {
+        } catch {
           throw new Error(`レビューの取得に失敗しました (${response.status})`);
         }
       }
 
       const data = await response.json();
-      console.log('取得したレビューデータ:', data);
+      console.log('取得したレビューデータ（完全版）:', JSON.stringify(data, null, 2));
       setReviews(data.reviews || []);
     } catch (error) {
       console.error('レビュー取得エラー:', error);
@@ -199,30 +104,9 @@ export default function ParkDetailPage() {
         }
 
         const data = await response.json();
-
-        // 公園データをデータベースに保存
-        // const saveResponse = await fetch('/api/parks', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({
-        //     place_id: id,
-        //     name: data.park.name,
-        //     address: data.park.address || '',
-        //   }),
-        // });
-        // const saveResponse = await fetch('/api/parks', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({
-        //     placeId: id,  // place_id から placeId に変更
-        //     name: data.park.name,
-        //     address: data.park.address || '',
-        //   }),
-        // });
+        // デバッグ情報を追加
+        console.log('取得した公園データ（完全版）:', JSON.stringify(data, null, 2));
+        console.log('photos配列:', data.park.photos);
 
         const saveResponse = await fetch('/api/parks', {
           method: 'POST',
@@ -314,7 +198,8 @@ export default function ParkDetailPage() {
 
       setIsCreateModalOpen(false);
       alert('レビューを投稿しました');
-      router.refresh();
+      // レビュー投稿後にレビュー一覧を再取得
+      fetchReviews();
     } catch (error) {
       console.error('レビュー投稿エラー:', error);
       alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
@@ -334,17 +219,20 @@ export default function ParkDetailPage() {
               <p className="text-sm text-muted-foreground">公園写真</p>
             </div>
             <div className="flex justify-center">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] max-w-fit">
-                <Image
-                  loader={({ src }) => src}
-                  src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
-                  alt={parkData.name}
-                  className="object-cover"
-                  width={533}
-                  height={400}
-                  unoptimized
-                />
-              </div>
+              {parkData.photos && parkData.photos.length > 0 ? (
+                <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] max-w-fit">
+                  <img
+                    src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
+                    alt={parkData.name}
+                    className="object-cover h-full w-full"
+                  />
+                </div>
+              ) : (
+                <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] w-full bg-gray-200 flex flex-col items-center justify-center">
+                  <Camera className="h-12 w-12 text-gray-400" />
+                  <p className="text-gray-500 mt-2">写真がありません</p>
+                </div>
+              )}
             </div>
           </Card>
         </div>

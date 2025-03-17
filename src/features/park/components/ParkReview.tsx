@@ -10,7 +10,7 @@ interface ParkReviewProps {
   username: string;
   content: string;
   date: string;
-  images: string[];
+  images: { image_url: string }[] | string[]; // 両方の形式に対応
 }
 
 export function ParkReview({ username, content, date, images }: ParkReviewProps) {
@@ -18,6 +18,13 @@ export function ParkReview({ username, content, date, images }: ParkReviewProps)
     // デバッグ用
     console.log('レビュー画像URL:', images);
   }, [images]);
+
+  // 画像URLを正規化する関数
+  const normalizeImageUrl = (image: any): string => {
+    if (typeof image === 'string') return image;
+    if (image && image.image_url) return image.image_url;
+    return '';
+  };
 
   return (
     <Card className="p-6">
@@ -27,22 +34,28 @@ export function ParkReview({ username, content, date, images }: ParkReviewProps)
 
       {images && images.length > 0 && (
         <div className="flex gap-2 mb-4 overflow-x-auto py-1">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="relative w-[80px] h-[80px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200"
-            >
-              <Image
-                src={image}
-                alt={`レビュー画像 ${index + 1}`}
-                fill
-                className="object-cover"
-                unoptimized
-                onerror = null;
-                blurDataURL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7nlLvpnaI8L3RleHQ+PC9zdmc+';
-              />
-            </div>
-          ))}
+          {images.map((image, index) => {
+            const imageUrl = normalizeImageUrl(image);
+            if (!imageUrl) return null;
+
+            return (
+              <div
+                key={index}
+                className="relative w-[80px] h-[80px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200"
+              >
+                <Image
+                  src={imageUrl}
+                  alt={`レビュー画像 ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                  onError={() => {
+                    console.error(`画像の読み込みに失敗しました: ${imageUrl}`);
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 

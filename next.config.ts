@@ -1,13 +1,14 @@
-import type { NextConfig } from 'next';
+import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: ['dwxml.imgix.net', 'dwxml.com'],
+    domains: ['dwxmlrbidwnplhjivfxd.supabase.co'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'dwxmlrbidwnplhjivfxd.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
   },

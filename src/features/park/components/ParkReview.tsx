@@ -3,28 +3,19 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ThumbsUp } from 'lucide-react';
-import Image from 'next/image';
 import React, { useEffect } from 'react';
 
 interface ParkReviewProps {
   username: string;
   content: string;
   date: string;
-  images: { image_url: string }[] | string[]; // 両方の形式に対応
+  images: string[]; // 型を簡略化
 }
 
 export function ParkReview({ username, content, date, images }: ParkReviewProps) {
   useEffect(() => {
-    // デバッグ用
     console.log('レビュー画像URL:', images);
   }, [images]);
-
-  // 画像URLを正規化する関数
-  const normalizeImageUrl = (image: any): string => {
-    if (typeof image === 'string') return image;
-    if (image && image.image_url) return image.image_url;
-    return '';
-  };
 
   return (
     <Card className="p-6">
@@ -32,30 +23,30 @@ export function ParkReview({ username, content, date, images }: ParkReviewProps)
 
       <p className="whitespace-pre-line mb-4 text-muted-foreground">{content}</p>
 
+      {/* 画像表示セクション */}
       {images && images.length > 0 && (
-        <div className="flex gap-2 mb-4 overflow-x-auto py-1">
-          {images.map((image, index) => {
-            const imageUrl = normalizeImageUrl(image);
-            if (!imageUrl) return null;
-
-            return (
-              <div
-                key={index}
-                className="relative w-[80px] h-[80px] flex-shrink-0 overflow-hidden rounded-md border border-gray-200"
-              >
-                <Image
-                  src={imageUrl}
-                  alt={`レビュー画像 ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                  onError={() => {
-                    console.error(`画像の読み込みに失敗しました: ${imageUrl}`);
-                  }}
-                />
-              </div>
-            );
-          })}
+        <div className="flex flex-wrap gap-2 mb-4 overflow-hidden">
+          {images.map((imageUrl, index) => (
+            <div
+              key={index}
+              className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200"
+              style={{ maxWidth: '80px', maxHeight: '80px' }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imageUrl}
+                alt={`レビュー画像 ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  console.error(`画像の読み込みに失敗しました: ${imageUrl}`);
+                  e.currentTarget.src =
+                    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7nlLvpnaI8L3RleHQ+PC9zdmc+';
+                }}
+                style={{ maxWidth: '100%', maxHeight: '100%' }}
+              />
+            </div>
+          ))}
         </div>
       )}
 

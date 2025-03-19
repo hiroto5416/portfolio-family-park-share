@@ -14,4 +14,5 @@ export interface ReviewFormData {
 
 export interface ReviewListProps {
   reviews: Review[];
+  isLoading?: boolean;
 }

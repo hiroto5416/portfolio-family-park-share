@@ -15,7 +15,23 @@ import { ReviewEditModal } from '../ReviewEditModal';
 
 const REVIEWS_PER_PAGE = 5;
 
-export function UserReviews({ reviews }: ReviewListProps) {
+interface Review {
+  id: string;
+  content: string;
+  likes_count: number;
+  created_at: string;
+  park_id: string;
+  parks: {
+    id: string;
+    name: string;
+  };
+  review_images: {
+    id: string;
+    image_url: string;
+  }[];
+}
+
+export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -24,6 +40,18 @@ export function UserReviews({ reviews }: ReviewListProps) {
   // const handleEdit = (reviewId: number) => {
   //   console.log('編集:', reviewId);
   // };
+
+  if (isLoading) {
+    return <div className="text-center py-6">レビューを読み込み中...</div>;
+  }
+
+  if (!reviews || reviews.length === 0) {
+    return (
+      <Card className="p-6 text-center">
+        <p className="text-muted-foreground">まだレビューがありません</p>
+      </Card>
+    );
+  }
 
   const handleDelete = (reviewId: number) => {
     console.log('削除:', reviewId);

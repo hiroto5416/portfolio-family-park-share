@@ -15,31 +15,10 @@ import { ReviewEditModal } from '../ReviewEditModal';
 
 const REVIEWS_PER_PAGE = 5;
 
-interface Review {
-  id: string;
-  content: string;
-  likes_count: number;
-  created_at: string;
-  park_id: string;
-  parks: {
-    id: string;
-    name: string;
-  };
-  review_images: {
-    id: string;
-    image_url: string;
-  }[];
-}
-
 export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // ハンドラー関数
-  // const handleEdit = (reviewId: number) => {
-  //   console.log('編集:', reviewId);
-  // };
 
   if (isLoading) {
     return <div className="text-center py-6">レビューを読み込み中...</div>;
@@ -53,8 +32,76 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
     );
   }
 
-  const handleDelete = (reviewId: number) => {
-    console.log('削除:', reviewId);
+  // 削除処理
+  const handleDelete = async (reviewId: number) => {
+    if (!confirm('このレビューを削除してもよろしいですか？')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/reviews/${reviewId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'レビューの削除に失敗しました');
+      }
+
+      // 成功したら一覧から削除（表示上の更新）
+      const updatedReviews = reviews.filter((review) => review.id !== reviewId);
+
+      // ここで親コンポーネントに削除を通知する必要があります
+      // この例では、親コンポーネントからonDeleteのようなコールバックが渡されていることを想定しています
+      // もし渡されていない場合は、親コンポーネントを修正してコールバックを追加する必要があります
+      if (typeof onDelete === 'function') {
+        onDelete(reviewId);
+      }
+
+      // ページが空になった場合に前のページに戻る
+      if (currentReviews.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    } catch (error) {
+      console.error('レビュー削除エラー:', error);
+      alert(error instanceof Error ? error.message : '削除に失敗しました');
+    }
+  };
+
+  // 編集処理
+  const handleEdit = (reviewId: number) => {
+    const review = reviews.find((r) => r.id === reviewId);
+    if (review) {
+      setSelectedReview(review);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  // 編集保存処理
+  const handleSaveEdit = async (id: number, content: string) => {
+    try {
+      const response = await fetch(`/api/reviews/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'レビューの更新に失敗しました');
+      }
+
+      // ここで親コンポーネントに更新を通知する必要があります
+      if (typeof onUpdate === 'function') {
+        onUpdate(id, content);
+      }
+
+      setIsEditModalOpen(false);
+      setSelectedReview(null);
+    } catch (error) {
+      console.error('レビュー更新エラー:', error);
+      alert(error instanceof Error ? error.message : '更新に失敗しました');
+    }
   };
 
   // 総ページ数
@@ -71,14 +118,6 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
     setCurrentPage(pageNumber);
   };
 
-  const handleEdit = (reviewId: number) => {
-    const review = reviews.find((r) => r.id === reviewId);
-    if (review) {
-      setSelectedReview(review);
-      setIsEditModalOpen(true);
-    }
-  };
-
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-6">あなたのレビュー</h2>
@@ -90,7 +129,7 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-medium md:text-lg">{review.parkName}</h3>
 
-              {/* モバイル用メニュー - 現状維持 */}
+              {/* モバイル用メニュー */}
               <div className="md:hidden">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -187,11 +226,7 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
             setSelectedReview(null);
           }}
           review={selectedReview}
-          onSave={(id, content) => {
-            console.log('保存:', id, content);
-            setIsEditModalOpen(false);
-            setSelectedReview(null);
-          }}
+          onSave={handleSaveEdit} // 実装した保存ハンドラーを使用
         />
       )}
     </Card>

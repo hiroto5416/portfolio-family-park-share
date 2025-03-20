@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { UserReviews } from './UserReviews';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+// import { supabase } from '@/lib/supabase';
 
 interface AccountTabProps {
   initialData: {
@@ -46,20 +46,35 @@ export function AccountTab({ initialData }: AccountTabProps) {
   });
 
   // レビューを取得する関数
+  // async function fetchUserReviews(userId: string) {
+  //   setIsLoading(true);
+  //   try {
+  //     // 手動で確認したIDを使用
+  //     const knownWorkingId = 'cm88cq19v0000rx69oodg47kx'; // NextAuthから取得したID
+  //     const response = await fetch(`/api/reviews/user?userId=${knownWorkingId}`);
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error || 'レビュー取得に失敗しました');
+  //     }
+
+  //     const data = await response.json();
+  //     console.log('APIレスポンス:', data);
+  //     setReviews(data.reviews || []);
+  //   } catch (err) {
+  //     console.error('レビュー取得エラー', err);
+  //     setError(err instanceof Error ? err.message : '予期せぬエラーが発生しました');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  // AccountTabの fetchUserReviews 関数を修正
   async function fetchUserReviews(userId: string) {
     setIsLoading(true);
     try {
-      // メールアドレスもクエリパラメータとして追加
-      const userEmail = initialData.email;
-      // const response = await fetch(
-      //   `/api/reviews/user?userId=${userId}&userEmail=${encodeURIComponent(userEmail)}`
-      // );
-
-      // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-      // 手動で確認したIDを使用
-      const knownWorkingId = 'cm88cq19v0000rx69oodg47kx'; // NextAuthから取得したID
-      const response = await fetch(`/api/reviews/user?userId=${knownWorkingId}`);
-      // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+      // 実際のセッションから取得したIDを使用
+      const response = await fetch(`/api/reviews/by-user?userId=${userId}`);
 
       if (!response.ok) {
         const errorData = await response.json();

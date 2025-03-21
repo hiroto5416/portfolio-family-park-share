@@ -33,7 +33,7 @@ export default function MyPage() {
 
   // sessionからユーザー情報を取得
   const userData = {
-    username: session?.user?.name || '',
+    name: session?.user?.name || '',
     email: session?.user?.email || '',
     avatar: session?.user?.image || null,
     id: session?.user?.email || '', // emailをIDとして使用する場合

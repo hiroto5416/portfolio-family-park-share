@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 interface AccountTabProps {
   initialData: {
-    username: string;
+    name: string;
     email: string;
     id: string;
   };
@@ -42,7 +42,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [activeSubTab, setActiveSubTab] = useState('reviews');
   const [formData, setFormData] = useState({
-    username: initialData.username,
+    name: initialData.name,
   });
 
   // レビューを取得する関数
@@ -144,7 +144,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
       const response = await fetch('/api/user/update-profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: formData.username }),
+        body: JSON.stringify({ name: formData.name }),
       });
 
       if (!response.ok) {
@@ -174,8 +174,8 @@ export function AccountTab({ initialData }: AccountTabProps) {
           <div className="space-y-2">
             <label className="text-sm font-medium">お名前</label>
             <Input
-              name="username"
-              value={formData.username}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               disabled={!isLoading}
             />

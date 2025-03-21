@@ -68,9 +68,8 @@ model PrivacySettings {
 
 model User {
   id              String           @id @default(cuid())
-  name            String?
+  name            String           @unique
   email           String           @unique
-  username        String           @unique
   avatarUrl       String?          @map("avatar_url")
   password        String
   createdAt       DateTime         @default(now()) @map("created_at")
@@ -78,4 +77,6 @@ model User {
   likes           Like[]
   privacySettings PrivacySettings?
   reviews         Review[]
+
+  @@map("users")
 }

@@ -16,19 +16,19 @@ export async function getUserReviews() {
     return [];
   }
 
-  // Step 1: SessionのuserIdからprofilesテーブルのIDを取得
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
+  // Step 1: SessionのuserIdからusersテーブルのIDを取得
+  const { data: usersData, error: usersError } = await supabase
+    .from('users')
     .select('id')
     .eq('user_id', session.user.id)
     .single();
 
-  if (profileError || !profileData) {
-    console.error('プロファイルデータの取得に失敗しました:', profileError);
+  if (usersError || !usersData) {
+    console.error('プロファイルデータの取得に失敗しました:', usersError);
     return [];
   }
 
-  // Step 2: 取得したprofiles.idを使ってreviewsを検索
+  // Step 2: 取得したusers.idを使ってreviewsを検索
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
     .select(
@@ -38,7 +38,7 @@ export async function getUserReviews() {
       images:review_images(*)
     `
     )
-    .eq('user_id', profileData.id)
+    .eq('user_id', usersData.id)
     .order('created_at', { ascending: false });
 
   if (reviewsError) {
@@ -62,14 +62,14 @@ export async function updateReview(reviewId: string, content: string) {
     throw new Error('ログインが必要です');
   }
 
-  // Step 1: SessionのuserIdからprofilesテーブルのIDを取得
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
+  // Step 1: SessionのuserIdからusersテーブルのIDを取得
+  const { data: usersData, error: usersError } = await supabase
+    .from('users')
     .select('id')
     .eq('user_id', session.user.id)
     .single();
 
-  if (profileError || !profileData) {
+  if (usesError || !usesData) {
     throw new Error('プロファイルデータの取得に失敗しました');
   }
 
@@ -85,7 +85,7 @@ export async function updateReview(reviewId: string, content: string) {
   }
 
   // ログインユーザーのプロファイルIDとレビューの作成者IDが一致するか確認
-  if (existingReview.user_id !== profileData.id) {
+  if (existingReview.user_id !== usesData.id) {
     throw new Error('このレビューを編集する権限がありません');
   }
 
@@ -118,14 +118,14 @@ export async function deleteReview(reviewId: string) {
     throw new Error('ログインが必要です');
   }
 
-  // Step 1: SessionのuserIdからprofilesテーブルのIDを取得
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
+  // Step 1: SessionのuserIdからusesテーブルのIDを取得
+  const { data: usersData, error: usersError } = await supabase
+    .from('users')
     .select('id')
     .eq('user_id', session.user.id)
     .single();
 
-  if (profileError || !profileData) {
+  if (usersError || !usersData) {
     throw new Error('プロファイルデータの取得に失敗しました');
   }
 
@@ -141,7 +141,7 @@ export async function deleteReview(reviewId: string) {
   }
 
   // ログインユーザーのプロファイルIDとレビューの作成者IDが一致するか確認
-  if (existingReview.user_id !== profileData.id) {
+  if (existingReview.user_id !== usersData.id) {
     throw new Error('このレビューを削除する権限がありません');
   }
 
@@ -175,23 +175,23 @@ export async function createReview(parkId: string, content: string, imageUrls?: 
     throw new Error('ログインが必要です');
   }
 
-  // Step 1: SessionのuserIdからprofilesテーブルのIDを取得
-  const { data: profileData, error: profileError } = await supabase
-    .from('profiles')
+  // Step 1: SessionのuserIdからusersテーブルのIDを取得
+  const { data: usersData, error: usersError } = await supabase
+    .from('users')
     .select('id')
     .eq('user_id', session.user.id)
     .single();
 
-  if (profileError || !profileData) {
+  if (usersError || !usersData) {
     throw new Error('プロファイルデータの取得に失敗しました');
   }
 
-  // Step 2: profileData.idを使用してレビューを作成
+  // Step 2: usersData.idを使用してレビューを作成
   const { data, error } = await supabase
     .from('reviews')
     .insert({
       park_id: parkId,
-      user_id: profileData.id, // profilesテーブルのIDを使用
+      user_id: usersData.id, // usersテーブルのIDを使用
       content: content,
     })
     .select()

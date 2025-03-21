@@ -11,12 +11,12 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { username } = body;
+    const { name } = body;
 
     // ユーザー情報を更新
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
-      data: { name: username },
+      data: { name: name },
     });
 
     return NextResponse.json({ user: updatedUser });

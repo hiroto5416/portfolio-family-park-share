@@ -14,19 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
-    // Step 1: userIdからprofilesのidを取得する
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
-
-    if (profileError || !profileData) {
-      console.error('プロファイル取得エラー:', profileError);
-      return NextResponse.json({ error: 'プロファイルが見つかりませんでした' }, { status: 404 });
-    }
-
-    // Step 2: profilesのidを使用してレビューを取得
+    // ユーザーIDを直接使用してレビューを取得
     const { data: reviews, error: reviewsError } = await supabase
       .from('reviews')
       .select(
@@ -36,7 +24,7 @@ export async function GET(request: NextRequest) {
         review_images (*)
       `
       )
-      .eq('user_id', profileData.id)
+      .eq('user_id', userId) // 直接セッションのuserIdを使用
       .order('created_at', { ascending: false });
 
     if (reviewsError) {

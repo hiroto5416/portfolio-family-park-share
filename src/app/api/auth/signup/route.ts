@@ -5,10 +5,10 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, email, password } = body;
+    const { name, email, password } = body;
 
     // バリデーション
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json({ error: '必須項目が入力されていません' }, { status: 400 });
     }
 
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     // ユーザーの作成
     const user = await prisma.user.create({
       data: {
-        name: username,
+        name: name,
         email,
         password: hashedPassword,
       },

@@ -20,8 +20,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     // 公園IDを取得（失敗した場合はパラメータのIDをそのまま使用）
     const parkId = parkResult.error ? params.id : parkResult.data?.id;
-    console.log('Using park ID for reviews query:', parkId);
-
+    console.log('クエリ実行開始...');
     // 2. レビューの取得
     const { data: reviews, error } = await supabase
       .from('reviews')
@@ -31,8 +30,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
         content,
         created_at,
         likes_count,
-        profiles (
-          username
+        users (
+          name
         ),
         review_images (
           image_url
@@ -41,6 +40,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       )
       .eq('park_id', parkId)
       .order('created_at', { ascending: false });
+
+    console.log('クエリ結果:', { data: reviews, error });
 
     // エラーチェック
     if (error) {

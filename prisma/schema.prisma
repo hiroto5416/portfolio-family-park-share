@@ -7,19 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Profile {
-  id              String           @id @default(uuid())
-  username        String           @unique @map("username")
-  avatarUrl       String?          @map("avatar_url")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at")
-  likes           Like[]
-  privacySettings PrivacySettings?
-  reviews         Review[]
-
-  @@map("profiles")
-}
-
 model Park {
   id        String   @id @default(uuid())
   place_id  String   @unique @map("place_id")
@@ -43,7 +30,7 @@ model Review {
   likes      Like[]
   images     ReviewImage[]
   park       Park          @relation(fields: [parkId], references: [id])
-  user       Profile       @relation(fields: [userId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
 
   @@map("reviews")
 }
@@ -64,7 +51,7 @@ model Like {
   userId    String   @map("user_id")
   createdAt DateTime @default(now()) @map("created_at")
   review    Review   @relation(fields: [reviewId], references: [id])
-  user      Profile  @relation(fields: [userId], references: [id])
+  user      User  @relation(fields: [userId], references: [id])
 
   @@unique([reviewId, userId])
   @@map("likes")
@@ -74,16 +61,21 @@ model PrivacySettings {
   userId          String   @id @map("user_id")
   locationEnabled Boolean  @default(false) @map("location_enabled")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
-  user            Profile  @relation(fields: [userId], references: [id])
+  user     User  @relation(fields: [userId], references: [id])
 
   @@map("privacy_settings")
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String?
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id              String           @id @default(cuid())
+  name            String?
+  email           String           @unique
+  username        String           @unique
+  avatarUrl       String?          @map("avatar_url")
+  password        String
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  likes           Like[]
+  privacySettings PrivacySettings?
+  reviews         Review[]
 }

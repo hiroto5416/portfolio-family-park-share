@@ -7,11 +7,10 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { UserReviews } from './UserReviews';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 
 interface AccountTabProps {
   initialData: {
-    username: string;
+    name: string;
     email: string;
     id: string;
   };
@@ -40,26 +39,15 @@ export function AccountTab({ initialData }: AccountTabProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState('reviews');
   const [formData, setFormData] = useState({
-    username: initialData.username,
+    name: initialData.name,
   });
 
-  // レビューを取得する関数
   async function fetchUserReviews(userId: string) {
     setIsLoading(true);
     try {
-      // メールアドレスもクエリパラメータとして追加
-      const userEmail = initialData.email;
-      // const response = await fetch(
-      //   `/api/reviews/user?userId=${userId}&userEmail=${encodeURIComponent(userEmail)}`
-      // );
-
-      // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-      // 手動で確認したIDを使用
-      const knownWorkingId = 'cm88cq19v0000rx69oodg47kx'; // NextAuthから取得したID
-      const response = await fetch(`/api/reviews/user?userId=${knownWorkingId}`);
-      // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+      // 実際のセッションから取得したIDを使用
+      const response = await fetch(`/api/reviews/by-user?userId=${userId}`);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -67,7 +55,6 @@ export function AccountTab({ initialData }: AccountTabProps) {
       }
 
       const data = await response.json();
-      console.log('APIレスポンス:', data);
       setReviews(data.reviews || []);
     } catch (err) {
       console.error('レビュー取得エラー', err);
@@ -77,9 +64,8 @@ export function AccountTab({ initialData }: AccountTabProps) {
     }
   }
 
-  // Supabaseから取得したレビューを、UserReviewsコンポーネントが期待する形式に変換
-  const convertedReviews = reviews.map((review) => ({
-    id: Number(review.id),
+  const convertedReviews = reviews.map((review, index) => ({
+    id: review.id ? Number(review.id) : index,
     parkName: review.parks?.name || '不明な公園',
     content: review.content,
     date: new Date(review.created_at).toLocaleDateString('ja-JP'),
@@ -89,28 +75,10 @@ export function AccountTab({ initialData }: AccountTabProps) {
 
   // ユーザーのレビューを取得
   useEffect(() => {
-    if (activeSubTab === 'reviews' && initialData?.id) {
+    if (initialData?.id) {
       fetchUserReviews(initialData.id);
     }
-  }, [activeSubTab, initialData?.id]);
-  // const MOCK_REVIEWS = [
-  //   {
-  //     id: 1,
-  //     parkName: '代々木公園',
-  //     content: '広々としていて気持ちよかったです',
-  //     date: '2024-11-15',
-  //     likes: 5,
-  //     images: [],
-  //   },
-  //   {
-  //     id: 2,
-  //     parkName: '井の頭公園',
-  //     content: '池の周りの景色が綺麗でした',
-  //     date: '2024-10-10',
-  //     likes: 8,
-  //     images: [],
-  //   },
-  // ];
+  }, [initialData?.id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -129,7 +97,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
       const response = await fetch('/api/user/update-profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: formData.username }),
+        body: JSON.stringify({ name: formData.name }),
       });
 
       if (!response.ok) {
@@ -159,8 +127,8 @@ export function AccountTab({ initialData }: AccountTabProps) {
           <div className="space-y-2">
             <label className="text-sm font-medium">お名前</label>
             <Input
-              name="username"
-              value={formData.username}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               disabled={!isLoading}
             />

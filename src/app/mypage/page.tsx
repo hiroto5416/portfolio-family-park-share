@@ -17,26 +17,16 @@ export default function MyPage() {
     }
   }, [status, router]);
 
-  useEffect(() => {
-    console.log('NextAuthセッション:', session);
-    // 以下の情報をコンソールで確認してください
-    console.log('ユーザー識別情報:', {
-      id: session?.user?.id,
-      email: session?.user?.email,
-      name: session?.user?.name,
-    });
-  }, [session]);
-
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
 
   // sessionからユーザー情報を取得
   const userData = {
-    username: session?.user?.name || '',
+    name: session?.user?.name || '',
     email: session?.user?.email || '',
     avatar: session?.user?.image || null,
-    id: session?.user?.email || '', // emailをIDとして使用する場合
+    id: session?.user?.id || '',
   };
 
   return (

@@ -1,23 +1,6 @@
 import { Park } from '@/types/park';
 import { NextResponse } from 'next/server';
 
-// interface PlaceResult {
-//   place_id: string;
-//   name: string;
-//   vicinity: string;
-//   geometry: {
-//     location: {
-//       lat: number;
-//       lng: number;
-//     };
-//   };
-//   photos?: {
-//     photo_reference: string;
-//     height: number;
-//     width: number;
-//   }[];
-// }
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get('lat');
@@ -45,7 +28,8 @@ export async function GET(request: Request) {
       vicinity: result.vicinity,
       location: result.geometry.location,
       photos:
-        result.photos?.map((photo) => ({
+        result.photos?.map((photo, index) => ({
+          id: `${result.place_id}-photo-${index}`,
           photo_reference: photo.photo_reference,
           height: photo.height,
           width: photo.width,

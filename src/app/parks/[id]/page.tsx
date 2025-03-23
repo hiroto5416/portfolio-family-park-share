@@ -31,8 +31,8 @@ interface Review {
   content: string;
   created_at: string;
   likes_count: number;
-  profiles: {
-    username: string;
+  users: {
+    name: string;
   };
   review_images: {
     image_url: string;
@@ -60,7 +60,6 @@ export default function ParkDetailPage() {
     setReviewError(null);
 
     try {
-      console.log('Fetching reviews for park:', id);
       const response = await fetch(`/api/parks/${id}/reviews`);
 
       if (!response.ok) {
@@ -76,7 +75,6 @@ export default function ParkDetailPage() {
       }
 
       const data = await response.json();
-      console.log('取得したレビューデータ（完全版）:', JSON.stringify(data, null, 2));
       setReviews(data.reviews || []);
     } catch (error) {
       console.error('レビュー取得エラー:', error);
@@ -96,7 +94,6 @@ export default function ParkDetailPage() {
       }
 
       try {
-        console.log('Fetching park with ID:', id);
         const response = await fetch(`/api/parks/${id}`);
 
         if (!response.ok) {
@@ -104,9 +101,6 @@ export default function ParkDetailPage() {
         }
 
         const data = await response.json();
-        // デバッグ情報を追加
-        console.log('取得した公園データ（完全版）:', JSON.stringify(data, null, 2));
-        console.log('photos配列:', data.park.photos);
 
         const saveResponse = await fetch('/api/parks', {
           method: 'POST',
@@ -114,7 +108,7 @@ export default function ParkDetailPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            place_id: id, // placeIdではなくplace_idを使用
+            place_id: id,
             name: data.park.name,
             address: data.park.address || '',
           }),
@@ -146,7 +140,6 @@ export default function ParkDetailPage() {
     );
   }
 
-  // エラー表示を改善
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -155,7 +148,6 @@ export default function ParkDetailPage() {
     );
   }
 
-  // データが存在しない場合の表示を改善
   if (!parkData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -188,7 +180,7 @@ export default function ParkDetailPage() {
     try {
       const response = await fetch('/api/reviews', {
         method: 'POST',
-        body: formData, // FormDataをそのまま送信
+        body: formData,
       });
 
       if (!response.ok) {
@@ -221,6 +213,7 @@ export default function ParkDetailPage() {
             <div className="flex justify-center">
               {parkData.photos && parkData.photos.length > 0 ? (
                 <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] max-w-fit">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
                     alt={parkData.name}
@@ -280,7 +273,7 @@ export default function ParkDetailPage() {
                 {currentReviews.map((review) => (
                   <ParkReview
                     key={review.id}
-                    username={review.profiles.username}
+                    name={review.users.name}
                     content={review.content}
                     date={review.created_at}
                     images={review.review_images.map((img) => img.image_url)}

@@ -5,14 +5,16 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     // プロフィールの作成テスト
-    const profile = await prisma.profile.create({
+    const users = await prisma.user.create({
       data: {
-        username: 'testuser',
+        name: 'testuser',
         avatarUrl: null,
+        email: 'testuser@example.com',
+        password: 'password',
       },
     });
 
-    return NextResponse.json({ profile });
+    return NextResponse.json({ users });
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
   }

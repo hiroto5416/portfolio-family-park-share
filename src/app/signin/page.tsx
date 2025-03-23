@@ -9,7 +9,7 @@ import { signIn } from 'next-auth/react';
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -42,7 +42,7 @@ export default function SignInPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: formData.username,
+          name: formData.name,
           email: formData.email,
           password: formData.password,
         }),
@@ -116,13 +116,13 @@ export default function SignInPage() {
                   お名前
                 </label>
                 <Input
-                  id="username"
-                  name="username"
+                  id="name"
+                  name="name"
                   type="text"
                   autoCapitalize="none"
                   autoComplete="name"
                   autoCorrect="off"
-                  value={formData.username}
+                  value={formData.name}
                   onChange={handleChange}
                   required
                 />

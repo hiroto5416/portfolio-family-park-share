@@ -55,6 +55,11 @@ export async function POST(request: Request) {
             email: session.user.email,
             name: session.user.name || session.user.email.split('@')[0],
             password: hashedPassword,
+            privacySettings: {
+              create: {
+                locationEnabled: false,
+              },
+            },
           },
         });
         console.log('ユーザー作成成功:', user);
@@ -64,40 +69,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // プロフィール一覧の確認
-    const allProfiles = await prisma.profile.findMany({
-      take: 10, // 最初の10件だけ取得
-    });
-    console.log('データベースのプロフィール一覧:', JSON.stringify(allProfiles, null, 2));
-
-    // ユーザーに対応するプロフィールを検索
-    let profile = await prisma.profile.findFirst({
-      where: { username: user.email },
-    });
-
-    // プロフィールが存在しない場合は作成
-    if (!profile) {
-      console.log('プロフィールが存在しないため作成します:', user.email);
-      try {
-        profile = await prisma.profile.create({
-          data: {
-            username: user.email,
-            // 他の必須フィールドがあれば追加
-          },
-        });
-        console.log('プロフィール作成成功:', profile);
-      } catch (profileCreateError) {
-        console.error('プロフィール作成エラー:', profileCreateError);
-        return NextResponse.json({ error: 'プロフィールの作成に失敗しました' }, { status: 500 });
-      }
-    }
-
     // レビューの作成
     const review = await prisma.review.create({
       data: {
         content,
         parkId: park.id,
-        userId: profile.id,
+        userId: user.id,
       },
     });
 

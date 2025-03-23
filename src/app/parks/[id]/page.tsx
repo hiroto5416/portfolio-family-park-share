@@ -75,12 +75,6 @@ export default function ParkDetailPage() {
       }
 
       const data = await response.json();
-      console.log(
-        '最初のレビューの構造:',
-        data.reviews && data.reviews.length > 0
-          ? JSON.stringify(data.reviews[0], null, 2)
-          : 'レビューなし'
-      );
       setReviews(data.reviews || []);
     } catch (error) {
       console.error('レビュー取得エラー:', error);
@@ -107,7 +101,6 @@ export default function ParkDetailPage() {
         }
 
         const data = await response.json();
-        // デバッグ情報を追加
 
         const saveResponse = await fetch('/api/parks', {
           method: 'POST',
@@ -115,7 +108,7 @@ export default function ParkDetailPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            place_id: id, // placeIdではなくplace_idを使用
+            place_id: id,
             name: data.park.name,
             address: data.park.address || '',
           }),
@@ -147,7 +140,6 @@ export default function ParkDetailPage() {
     );
   }
 
-  // エラー表示を改善
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -156,7 +148,6 @@ export default function ParkDetailPage() {
     );
   }
 
-  // データが存在しない場合の表示を改善
   if (!parkData) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -189,7 +180,7 @@ export default function ParkDetailPage() {
     try {
       const response = await fetch('/api/reviews', {
         method: 'POST',
-        body: formData, // FormDataをそのまま送信
+        body: formData,
       });
 
       if (!response.ok) {
@@ -222,6 +213,7 @@ export default function ParkDetailPage() {
             <div className="flex justify-center">
               {parkData.photos && parkData.photos.length > 0 ? (
                 <div className="relative aspect-[4/3] overflow-hidden rounded-md h-[250px] max-w-fit">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/api/photo?reference=${parkData.photos[0].photo_reference}`}
                     alt={parkData.name}

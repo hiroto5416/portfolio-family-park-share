@@ -50,7 +50,6 @@ export function ParkList() {
   }, []);
 
   const handleImageError = (parkId: string | number) => {
-    console.log(`画像読み込みエラー (park ID: ${parkId})`);
     setImageErrors((prev) => ({ ...prev, [parkId]: true }));
   };
 
@@ -79,9 +78,7 @@ export function ParkList() {
 
         return (
           <Link href={`/parks/${encodeURIComponent(park.place_id) || ''}`} key={parkId} passHref>
-            <div
-              className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0"
-            >
+            <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
               <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
                 {photoReference && !hasImageError ? (
                   <Image

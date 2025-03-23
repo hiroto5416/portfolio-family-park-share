@@ -1,6 +1,5 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 /**
  * 公園のレビューを取得するAPI
@@ -10,47 +9,72 @@ import { NextResponse } from 'next/server';
  */
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-
-    console.log('Fetching reviews for park:', params.id);
+    const id = params.id;
+    console.log('Fetching reviews for park:', id);
 
     // 1. 公園IDの確認（place_idからidへの変換）
-    const parkResult = await supabase.from('parks').select('id').eq('place_id', params.id).single();
+    const parkResult = await prisma.park.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        place_id: id,
+      },
+    });
 
-    // 公園IDを取得（失敗した場合はパラメータのIDをそのまま使用）
-    const parkId = parkResult.error ? params.id : parkResult.data?.id;
-    console.log('クエリ実行開始...');
-    // 2. レビューの取得
-    const { data: reviews, error } = await supabase
-      .from('reviews')
-      .select(
-        `
-        id,
-        content,
-        created_at,
-        likes_count,
-        users (
-          name
-        ),
-        review_images (
-          image_url
-        )
-      `
-      )
-      .eq('park_id', parkId)
-      .order('created_at', { ascending: false });
-
-    console.log('クエリ結果:', { data: reviews, error });
-
-    // エラーチェック
-    if (error) {
-      console.error('Supabase query error:', error);
-      return NextResponse.json({ error: `レビュー取得エラー: ${error.message}` }, { status: 500 });
+    // 公園が見つからない場合はエラー
+    if (!parkResult) {
+      console.error('公園が見つかりません:', id);
+      return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
     }
 
+    console.log('クエリ実行開始...');
+
+    // 2. レビューの取得
+    const reviews = await prisma.review.findMany({
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        likesCount: true,
+        user: {
+          select: {
+            name: true,
+          },
+        },
+        images: {
+          select: {
+            imageUrl: true,
+          },
+        },
+      },
+      where: {
+        parkId: parkResult.id,
+      },
+      orderBy: [
+        {
+          createdAt: 'desc',
+        },
+      ],
+    });
+
+    // レスポンスの形式を元のSupabaseレスポースと合わせる
+    const formattedReviews = reviews.map((review) => ({
+      id: review.id,
+      content: review.content,
+      created_at: review.createdAt.toISOString(),
+      likes_count: review.likesCount,
+      users: {
+        // フロントエンドが users を期待しているため
+        name: review.user.name,
+      },
+      review_images: review.images.map((image) => ({
+        image_url: image.imageUrl,
+      })),
+    }));
+
     // 成功時はレビューデータを返す
-    return NextResponse.json({ reviews: reviews || [] });
+    return NextResponse.json({ reviews: formattedReviews || [] });
   } catch (error) {
     console.error('Review fetch error:', error);
     const errorMessage = error instanceof Error ? error.message : '不明なエラー';

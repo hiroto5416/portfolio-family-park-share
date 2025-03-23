@@ -3,20 +3,16 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ThumbsUp } from 'lucide-react';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 interface ParkReviewProps {
   name: string;
   content: string;
   date: string;
-  images: string[]; // 型を簡略化
+  images: string[];
 }
 
 export function ParkReview({ name, content, date, images }: ParkReviewProps) {
-  useEffect(() => {
-    console.log('レビュー画像URL:', images);
-  }, [images]);
-
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-2">{name}</h3>

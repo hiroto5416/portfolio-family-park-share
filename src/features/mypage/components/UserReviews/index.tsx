@@ -48,16 +48,6 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
         throw new Error(errorData.error || 'レビューの削除に失敗しました');
       }
 
-      // 成功したら一覧から削除（表示上の更新）
-      // const updatedReviews = reviews.filter((review) => review.id !== reviewId);
-
-      // ここで親コンポーネントに削除を通知する必要があります
-      // この例では、親コンポーネントからonDeleteのようなコールバックが渡されていることを想定しています
-      // もし渡されていない場合は、親コンポーネントを修正してコールバックを追加する必要があります
-      // if (typeof onDelete === 'function') {
-      //   onDelete(reviewId);
-      // }
-
       // ページが空になった場合に前のページに戻る
       if (currentReviews.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
@@ -90,12 +80,6 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'レビューの更新に失敗しました');
       }
-
-      // ここで親コンポーネントに更新を通知する必要があります
-      // if (typeof onUpdate === 'function') {
-      //   onUpdate(id, content);
-      // }
-
       setIsEditModalOpen(false);
       setSelectedReview(null);
     } catch (error) {
@@ -226,7 +210,7 @@ export function UserReviews({ reviews, isLoading = false }: ReviewListProps) {
             setSelectedReview(null);
           }}
           review={selectedReview}
-          onSave={handleSaveEdit} // 実装した保存ハンドラーを使用
+          onSave={handleSaveEdit}
         />
       )}
     </Card>

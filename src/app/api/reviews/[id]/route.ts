@@ -1,21 +1,17 @@
-// src/app/api/reviews/[id]/route.ts
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { uploadReviewImages } from '@/lib/uploadImage';
 
 // レビュー更新
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const reviewId = params.id;
-  const { content } = await request.json();
-
-  if (!reviewId || !content) {
-    return NextResponse.json({ error: '必要なデータが不足しています' }, { status: 400 });
-  }
-
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    // Supabaseクライアと
 
-    // セッションからユーザーIDを取得
+    const reviewId = params.id;
+
+    // セッション確認
+    const supabase = createRouteHandlerClient({ cookies });
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -23,10 +19,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
-    // セッションのユーザーIDを直接使用
-    const userId = session.user.id;
+    // フォームデータをパース
+    const formData = await request.formData();
+    const content = formData.get('content') as string;
 
-    // レビューの所有者を確認
+    // レビューの取得と所有者確認
     const { data: reviewData, error: reviewError } = await supabase
       .from('reviews')
       .select('user_id')
@@ -37,30 +34,74 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'レビューが見つかりません' }, { status: 404 });
     }
 
-    // 所有者チェック - 直接セッションのIDと比較
-    if (reviewData.user_id !== userId) {
-      return NextResponse.json({ error: '権限がありません' }, { status: 403 });
+    if (reviewData.user_id !== session.user.id) {
+      return NextResponse.json(
+        { error: 'このレビューを編集する権限がありません' },
+        { status: 403 }
+      );
     }
 
-    // レビュー更新
-    const { data, error } = await supabase
+    // 削除する画像の処理
+    const deletedImageUrls: string[] = [];
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith('deletedImages[')) {
+        deletedImageUrls.push(value as string);
+      }
+    }
+
+    // Supabaseから画像を削除
+    if (deletedImageUrls.length > 0) {
+      // URLからファイルパスを抽出
+      const filePaths = deletedImageUrls.map((url) => {
+        const path = url.split('/').slice(-2).join('/');
+        return path;
+      });
+
+      for (const path of filePaths) {
+        await supabase.storage.from('review-images').remove([path]);
+      }
+
+      // review_imagesテーブルからも削除
+      for (const url of deletedImageUrls) {
+        await supabase
+          .from('review_images')
+          .delete()
+          .eq('image_url', url)
+          .eq('review_id', reviewId);
+      }
+    }
+
+    // 新しい画像のアップロード
+    const imageFiles = formData.getAll('images') as File[];
+    let imageUrls: string[] = [];
+
+    if (imageFiles.length > 0) {
+      // 画像をアップロードして公開URLを取得
+      imageUrls = await uploadReviewImages(imageFiles, reviewId);
+
+      // review_imagesテーブルに画像URLを保存
+      for (const imageUrl of imageUrls) {
+        await supabase.from('review_images').insert({
+          review_id: reviewId,
+          image_url: imageUrl,
+        });
+      }
+    }
+
+    // レビュー内容を更新
+    const { error: updateError } = await supabase
       .from('reviews')
-      .update({
-        content,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', reviewId)
-      .select()
-      .single();
+      .update({ content })
+      .eq('id', reviewId);
 
-    if (error) {
-      return NextResponse.json({ error: '更新に失敗しました' }, { status: 500 });
+    if (updateError) {
+      return NextResponse.json({ error: '更新中にエラーが発生しました' }, { status: 500 });
     }
 
-    return NextResponse.json({ review: data });
+    return NextResponse.json({ message: 'レビューが更新されました', imageUrls }, { status: 200 });
   } catch (error) {
-    console.error('更新エラー:', error);
-    return NextResponse.json({ error: '予期せぬエラーが発生しました' }, { status: 500 });
+    console.error('レビュー更新エラー:', error);
+    return NextResponse.json({ error: 'サーバーエラーが発生しました' }, { status: 500 });
   }
 }
 

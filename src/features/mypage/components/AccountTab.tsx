@@ -46,7 +46,6 @@ export function AccountTab({ initialData }: AccountTabProps) {
   async function fetchUserReviews(userId: string) {
     setIsLoading(true);
     try {
-      // 実際のセッションから取得したIDを使用
       const response = await fetch(`/api/reviews/by-user?userId=${userId}`);
 
       if (!response.ok) {
@@ -55,6 +54,9 @@ export function AccountTab({ initialData }: AccountTabProps) {
       }
 
       const data = await response.json();
+      console.log('APIレスポンス:', data.reviews);
+      // ここで各レビューの「id」フィールドの値と型を確認
+      console.log('最初のレビューID:', data.reviews[0]?.id, typeof data.reviews[0]?.id);
       setReviews(data.reviews || []);
     } catch (err) {
       console.error('レビュー取得エラー', err);
@@ -64,14 +66,17 @@ export function AccountTab({ initialData }: AccountTabProps) {
     }
   }
 
-  const convertedReviews = reviews.map((review, index) => ({
-    id: review.id ? Number(review.id) : index,
-    parkName: review.parks?.name || '不明な公園',
-    content: review.content,
-    date: new Date(review.created_at).toLocaleDateString('ja-JP'),
-    likes: review.likes_count,
-    images: review.review_images?.map((img) => img.image_url) || [],
-  }));
+  const convertedReviews = reviews.map((review, index) => {
+    // UUIDをそのまま使用
+    return {
+      id: review.id || `temp-${index}`, // UUIDをそのまま文字列として使用
+      parkName: review.parks?.name || '不明な公園',
+      content: review.content,
+      date: new Date(review.created_at).toLocaleDateString('ja-JP'),
+      likes: review.likes_count,
+      images: review.review_images?.map((img) => img.image_url) || [],
+    };
+  });
 
   // ユーザーのレビューを取得
   useEffect(() => {
@@ -186,7 +191,11 @@ export function AccountTab({ initialData }: AccountTabProps) {
           </div>
         </div>
       </Card>
-      <UserReviews reviews={convertedReviews} isLoading={isLoading} />
+      <UserReviews
+        reviews={convertedReviews}
+        isLoading={isLoading}
+        onReviewUpdated={() => initialData?.id && fetchUserReviews(initialData.id)}
+      />
     </div>
   );
 }

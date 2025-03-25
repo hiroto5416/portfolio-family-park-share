@@ -207,6 +207,33 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
             {/* レビュー内容 */}
             <p className="text-muted-foreground mb-4">{review.content}</p>
 
+            {/* 画像の表示 */}
+            {review.images && review.images.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4 overflow-hidden">
+                {review.images.map((imageUrl, index) => (
+                  <div
+                    key={index}
+                    className="w-20 h-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200"
+                    style={{ maxWidth: '80px', maxHeight: '80px' }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt={`レビュー画像 ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.error(`画像の読み込みに失敗しました: ${imageUrl}`);
+                        e.currentTarget.src =
+                          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7nlLvpnaI8L3RleHQ+PC9zdmc+';
+                      }}
+                      style={{ maxWidth: '100%', maxHeight: '100%' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* いいね数と投稿日 */}
             <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
               <div className="flex items-center gap-1">

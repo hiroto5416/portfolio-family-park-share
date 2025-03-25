@@ -1,5 +1,5 @@
 export interface Review {
-  id: number;
+  id: string;
   parkName: string;
   content: string;
   date: string;
@@ -15,4 +15,5 @@ export interface ReviewFormData {
 export interface ReviewListProps {
   reviews: Review[];
   isLoading?: boolean;
+  onReviewUpdated?: () => void;
 }

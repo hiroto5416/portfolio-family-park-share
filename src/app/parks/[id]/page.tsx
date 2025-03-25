@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ParkDetail } from '@/features/park/components/ParkDetail';
 import { ParkReview } from '@/features/park/components/ParkReview';
 import { Card } from '@/components/ui/card';
@@ -53,12 +53,10 @@ export default function ParkDetailPage() {
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     if (!id) return;
-
     setIsLoadingReviews(true);
     setReviewError(null);
-
     try {
       const response = await fetch(`/api/parks/${id}/reviews`);
 
@@ -82,7 +80,7 @@ export default function ParkDetailPage() {
     } finally {
       setIsLoadingReviews(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     const fetchParkData = async () => {
@@ -129,7 +127,7 @@ export default function ParkDetailPage() {
 
     fetchParkData();
     fetchReviews();
-  }, [id, params]);
+  }, [id, params, fetchReviews]);
 
   // ローディング状態の表示
   if (loading) {

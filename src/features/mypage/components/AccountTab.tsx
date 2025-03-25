@@ -54,9 +54,6 @@ export function AccountTab({ initialData }: AccountTabProps) {
       }
 
       const data = await response.json();
-      console.log('APIレスポンス:', data.reviews);
-      // ここで各レビューの「id」フィールドの値と型を確認
-      console.log('最初のレビューID:', data.reviews[0]?.id, typeof data.reviews[0]?.id);
       setReviews(data.reviews || []);
     } catch (err) {
       console.error('レビュー取得エラー', err);

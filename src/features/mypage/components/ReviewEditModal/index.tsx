@@ -134,7 +134,7 @@ export function ReviewEditModal({ isOpen, onClose, review, onSave }: ReviewEditM
             {/* 画像アップロード部分 */}
             <div>
               <h3 className="text-lg font-semibold mb-3">写真</h3>
-              <div className="flex flex-col gap-3 mb-4">
+              <div className="flex flex-wrap gap-3 mb-4">
                 <div>
                   <Button
                     type="button"
@@ -167,7 +167,7 @@ export function ReviewEditModal({ isOpen, onClose, review, onSave }: ReviewEditM
               {existingImages.length > 0 && (
                 <div className="mb-4">
                   <h4 className="text-sm font-medium mb-2">現在の画像</h4>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  <div className="flex flex-row flex-nowrap overflow-x-auto gap-2 pb-2">
                     {existingImages.map((imageUrl, index) => (
                       <div
                         key={`existing-${index}`}
@@ -200,7 +200,7 @@ export function ReviewEditModal({ isOpen, onClose, review, onSave }: ReviewEditM
               {newImages.length > 0 && (
                 <div className="mb-4">
                   <h4 className="text-sm font-medium mb-2">新しい画像</h4>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  <div className="flex flex-row flex-nowrap overflow-x-auto gap-2 pb-2">
                     {newImages.map((image, index) => (
                       <div
                         key={`new-${index}`}

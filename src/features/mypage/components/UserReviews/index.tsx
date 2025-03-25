@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ReviewEditModal as ImportedReviewEditModal } from '../ReviewEditModal';
-// import { Dialog } from '@/components/ui/dialog';
+import { DeleteConfirmModal } from '../DeleteConfirmModal';
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -20,6 +20,8 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
 
   if (isLoading) {
     return <div className="text-center py-6">レビューを読み込み中...</div>;
@@ -33,15 +35,20 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
     );
   }
 
+  // 削除ボタンクリック時
+  const handleDeleteClick = (reviewId: string) => {
+    setReviewToDelete(reviewId);
+    setIsDeleteModalOpen(true);
+  };
+
   // 削除処理
-  const handleDelete = async (reviewId: string) => {
-    if (!confirm('このレビューを削除してもよろしいですか？')) {
-      return;
-    }
+  const handleDeleteConfirm = async () => {
+    if (!reviewToDelete) return;
 
     try {
-      const response = await fetch(`/api/reviews/${reviewId}`, {
+      const response = await fetch(`/api/reviews/${reviewToDelete}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -49,14 +56,27 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
         throw new Error(errorData.error || 'レビューの削除に失敗しました');
       }
 
-      // ページが空になった場合に前のページに戻る
-      if (currentReviews.length === 1 && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
+      // モーダルを閉じる
+      setIsDeleteModalOpen(false);
+      setReviewToDelete(null);
+
+      // レビュー一覧を更新
+      if (onReviewUpdated) {
+        onReviewUpdated();
       }
+
+      // 成功メッセージを表示
+      alert('レビューを削除しました');
     } catch (error) {
       console.error('レビュー削除エラー:', error);
       alert(error instanceof Error ? error.message : '削除に失敗しました');
     }
+  };
+
+  // モーダルを閉じる処理
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setReviewToDelete(null);
   };
 
   // 編集処理を修正
@@ -99,7 +119,6 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
         });
       }
 
-      // ⚠️ credentials: 'include'を追加してCookieを送信
       const response = await fetch(`/api/reviews/${id}`, {
         method: 'PUT',
         credentials: 'include',
@@ -140,13 +159,29 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-6">あなたのレビュー</h2>
-
       <div className="space-y-4">
         {currentReviews.map((review, index) => (
           <Card key={`review-${review.id || index}`} className="p-4 relative">
             {/* 公園名 */}
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-medium md:text-lg">{review.parkName}</h3>
+
+              {/* デスクトップ用ボタン */}
+              <div className="hidden md:flex justify-end gap-4">
+                <Button variant="outline" size="sm" onClick={() => handleEdit(review.id)}>
+                  <Pencil className="h-4 w-4 mr-1" />
+                  編集
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => handleDeleteClick(review.id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  削除
+                </Button>
+              </div>
 
               {/* モバイル用メニュー */}
               <div className="md:hidden">
@@ -159,7 +194,7 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleEdit(review.id)}>編集</DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleDelete(review.id)}
+                      onClick={() => handleDeleteClick(review.id)}
                       className="text-destructive"
                     >
                       削除
@@ -179,23 +214,6 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
                 <span>{review.likes}</span>
               </div>
               <span>{review.date}</span>
-            </div>
-
-            {/* デスクトップ用ボタン */}
-            <div className="hidden md:flex justify-end gap-4">
-              <Button variant="outline" size="sm" onClick={() => handleEdit(review.id)}>
-                <Pencil className="h-4 w-4 mr-1" />
-                編集
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive"
-                onClick={() => handleDelete(review.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                削除
-              </Button>
             </div>
           </Card>
         ))}
@@ -248,6 +266,13 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
           onSave={handleSaveEdit}
         />
       )}
+
+      {/* 削除確認モーダル */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+      />
     </Card>
   );
 }

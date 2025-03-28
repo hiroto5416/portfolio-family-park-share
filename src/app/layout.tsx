@@ -3,6 +3,7 @@ import './globals.css';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { AuthProvider } from '@/providers/auth-provider';
+import { SearchProvider } from '@/contexts/SearchContext';
 
 export const metadata: Metadata = {
   title: 'FAMILY PARK SHARE',
@@ -26,9 +27,11 @@ export default function RootLayout({
     <html lang="ja">
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
-          <Header />
-          <main className="flex-grow">{children}</main>
-          <Footer />
+          <SearchProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </SearchProvider>
         </AuthProvider>
       </body>
     </html>

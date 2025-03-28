@@ -4,6 +4,7 @@ import React from 'react';
 import { Park } from '../types/park';
 import { Card } from './ui/card';
 import { MapPin, Star, Clock } from 'lucide-react';
+import Image from 'next/image';
 
 interface SearchResultsProps {
   parks: Park[];
@@ -21,21 +22,31 @@ export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>エラー: {error}</p>
+      </div>
+    );
   }
 
   if (parks.length === 0) {
-    return <div className="text-center py-8 text-gray-500">検索結果が見つかりませんでした</div>;
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p>検索結果が見つかりませんでした</p>
+      </div>
+    );
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {parks.map((park) => (
-        <Card key={park.id} className="p-4">
+        <Card key={park.place_id} className="p-4 hover:shadow-lg transition-shadow">
           {park.photos && park.photos[0] && (
-            <img
-              src={park.photos[0]}
+            <Image
+              src={`/api/photo?reference=${park.photos[0].photo_reference}`}
               alt={park.name}
+              width={400}
+              height={192}
               className="w-full h-48 object-cover rounded-md mb-4"
             />
           )}
@@ -43,7 +54,7 @@ export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
           <div className="space-y-2 text-sm text-gray-600">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              <span>{park.address}</span>
+              <span>{park.vicinity}</span>
             </div>
             {park.rating && (
               <div className="flex items-center gap-2">

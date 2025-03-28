@@ -1,8 +1,7 @@
-import { Park, SearchResult, SearchParams } from '../types/park';
-import { GooglePlace } from '../types/google-places';
+import { Park, SearchResult, SearchParams, GooglePlace } from '../types/park';
 
 export class ParkSearchService {
-  private baseUrl = '/api/search'; // ローカルのAPIエンドポイントに変更
+  private baseUrl = '/api/search';
 
   // テキスト検索
   async searchByText(params: SearchParams): Promise<SearchResult> {
@@ -16,24 +15,29 @@ export class ParkSearchService {
         }),
       });
 
-      console.log('検索リクエストURL:', `${this.baseUrl}?${queryParams}`); // リクエストURLの確認
-
       const response = await fetch(`${this.baseUrl}?${queryParams}`);
       const data = await response.json();
-
-      console.log('APIレスポンス:', data); // レスポンスデータの確認
 
       if (!response.ok) {
         throw new Error(data.error || '検索に失敗しました');
       }
 
+      // データの存在確認を追加
+      if (!data.results || !Array.isArray(data.results)) {
+        return {
+          parks: [],
+          total: 0,
+        };
+      }
+
       const result = {
-        parks: data.results.map((place) => this.transformPlaceToPark(place)),
+        parks: data.results
+          .filter((place: GooglePlace) => place && place.place_id)
+          .map((place: GooglePlace) => this.transformPlaceToPark(place)),
         total: data.results.length,
         nextPageToken: data.next_page_token,
       };
 
-      console.log('変換後の結果:', result); // 変換後のデータ確認
       return result;
     } catch (error) {
       console.error('公園検索エラー:', error);
@@ -59,7 +63,7 @@ export class ParkSearchService {
       }
 
       return {
-        parks: data.results.map((place) => this.transformPlaceToPark(place)),
+        parks: data.results.map((place: GooglePlace) => this.transformPlaceToPark(place)),
         total: data.results.length,
         nextPageToken: data.next_page_token,
       };
@@ -71,27 +75,24 @@ export class ParkSearchService {
 
   // Google Places APIのレスポンスをPark型に変換
   private transformPlaceToPark(place: GooglePlace): Park {
-    const baseUrl = this.baseUrl;
     return {
-      id: place.place_id,
+      place_id: place.place_id,
       name: place.name,
-      address: place.formatted_address,
-      location: {
-        lat: place.geometry.location.lat,
-        lng: place.geometry.location.lng,
-      },
-      rating: place.rating,
-      userRatingsTotal: place.user_ratings_total,
-      photos: place.photos?.map(
-        (photo) => `${baseUrl}/photo?maxwidth=400&photo_reference=${photo.photo_reference}`
-      ),
-      openingHours: place.opening_hours
+      vicinity: place.vicinity || '',
+      formatted_address: place.formatted_address || place.vicinity || '',
+      location: place.geometry?.location
         ? {
-            isOpen: place.opening_hours.open_now || false,
-            periods: place.opening_hours.periods || [],
+            lat: place.geometry.location.lat,
+            lng: place.geometry.location.lng,
           }
         : undefined,
-      facilities: place.types,
+      rating: place.rating,
+      userRatingsTotal: place.user_ratings_total,
+      photos: place.photos?.map((photo) => ({
+        photo_reference: photo.photo_reference,
+        height: photo.height,
+        width: photo.width,
+      })),
     };
   }
 }

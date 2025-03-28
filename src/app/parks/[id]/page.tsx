@@ -64,6 +64,11 @@ export default function ParkDetailPage() {
         const errorText = await response.text();
         console.error('レビュー取得サーバーエラー:', response.status, errorText);
 
+        if (response.status === 404) {
+          setReviews([]);
+          return;
+        }
+
         try {
           const errorJson = JSON.parse(errorText);
           throw new Error(errorJson.error || 'レビューの取得に失敗しました');
@@ -117,6 +122,8 @@ export default function ParkDetailPage() {
         }
 
         setParkData(data.park);
+
+        await fetchReviews();
       } catch (error) {
         console.error('Error:', error);
         setError('公園情報の取得に失敗しました');
@@ -126,7 +133,6 @@ export default function ParkDetailPage() {
     };
 
     fetchParkData();
-    fetchReviews();
   }, [id, params, fetchReviews]);
 
   // ローディング状態の表示

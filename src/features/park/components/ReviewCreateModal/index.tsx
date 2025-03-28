@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Upload } from 'lucide-react';
+import { Upload, X, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState } from 'react';
 import heic2any from 'heic-convert';
@@ -26,7 +26,8 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
       return new File([convertedBuffer], file.name.replace('.heic', '.jpg'), {
         type: 'image/jpeg',
       });
-    } catch {
+    } catch (error) {
+      console.error('HEIC変換エラー:', error);
       throw new Error('画像の変換に失敗しました');
     }
   }
@@ -43,6 +44,8 @@ export function ReviewCreateModal({
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [charCount, setCharCount] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const MAX_CHARS = 1000;
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
   const MAX_IMAGES = 5;
@@ -76,6 +79,17 @@ export function ReviewCreateModal({
     }
   };
 
+  const handleDeleteImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+    if (selectedImage === URL.createObjectURL(images[index])) {
+      setSelectedImage(null);
+    }
+  };
+
+  const handleImageClick = (image: File) => {
+    setSelectedImage(URL.createObjectURL(image));
+  };
+
   const handleSubmit = async () => {
     try {
       if (!content.trim()) {
@@ -106,7 +120,7 @@ export function ReviewCreateModal({
         </DialogHeader>
 
         {/* メインコンテンツ部分 - スクロール可能 */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pr-2">
           <div className="space-y-6">
             <textarea
               value={content}
@@ -121,26 +135,24 @@ export function ReviewCreateModal({
 
             <div>
               <h3 className="text-lg font-semibold mb-3">写真</h3>
-              <div className="flex flex-col gap-3 mb-4">
+              <div className="flex flex-wrap gap-3 mb-4">
                 <div>
-                  <label className="w-full">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('image-upload')?.click()}
-                    >
-                      <Upload className="mr-2 h-4 w-4" />
-                      写真を選択
-                    </Button>
-                    <input
-                      id="image-upload"
-                      type="file"
-                      multiple
-                      accept="image/*,.heic"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    写真を選択
+                  </Button>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    multiple
+                    accept="image/*,.heic"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">最大5枚まで、各5MB以下</p>
@@ -150,27 +162,72 @@ export function ReviewCreateModal({
                 </div>
               </div>
 
-              {/* 写真プレビュー */}
+              {/* 画像プレビュー（サムネイル表示） */}
               {images.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                  {images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square w-full overflow-hidden rounded-md"
-                    >
-                      <Image
-                        src={URL.createObjectURL(image)}
-                        alt={`Preview ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
+                <div className="mb-4">
+                  <div className="flex flex-row flex-nowrap overflow-x-auto gap-2 pb-2">
+                    {images.map((image, index) => (
+                      <div
+                        key={`image-${index}`}
+                        className="relative w-16 h-16 md:w-20 md:h-20 overflow-hidden rounded-md cursor-pointer"
+                        onClick={() => handleImageClick(image)}
+                      >
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={URL.createObjectURL(image)}
+                            alt={`プレビュー ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        {/* 削除ボタン */}
+                        <div
+                          className="absolute top-0 right-0 p-0.5 bg-white rounded-full opacity-70 hover:opacity-100"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteImage(index);
+                          }}
+                        >
+                          <XCircle className="h-3 w-3 text-red-500" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
+
+        {/* 画像拡大モーダル */}
+        {selectedImage && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+            onClick={() => setSelectedImage(null)}
+          >
+            <div className="relative max-w-3xl max-h-[80vh] p-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute top-2 right-2 bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(null);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="bg-white p-2 rounded">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={selectedImage}
+                  alt="拡大画像"
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* フッター部分 - 下部に固定 */}
         <div className="mt-auto pt-4 border-t">

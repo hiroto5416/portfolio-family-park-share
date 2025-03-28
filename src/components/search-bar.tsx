@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import React from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { useSearch } from '../hooks/useSearch';
+import { useSearchContext } from '@/contexts/SearchContext';
 import { Loader2 } from 'lucide-react';
 
 interface SearchBarProps {
@@ -13,29 +13,23 @@ interface SearchBarProps {
 
 export function SearchBar({ size = 'default' }: SearchBarProps) {
   const inputClass = size === 'lg' ? 'h-12 text-lg' : 'h-9';
-  const { query, setQuery, search, isLoading, error } = useSearch();
+  const { query, setQuery, search, isLoading, error } = useSearchContext();
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    try {
-      console.log('検索開始:', query);
-      await search({ query: query.trim() });
-      console.log('検索完了');
-    } catch (error) {
-      console.error('検索エラー:', error);
-    }
+    await search({ query: query.trim() });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      handleSearch(e);
+      handleSubmit(e);
     }
   };
 
   return (
-    <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2">
       <div className="relative flex-grow">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <Input

@@ -27,6 +27,7 @@ export function useSearch() {
 
     try {
       const result = await parkSearchService.searchByText(params);
+
       setState((prev) => ({
         ...prev,
         results: result.parks,

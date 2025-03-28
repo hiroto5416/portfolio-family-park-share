@@ -62,7 +62,7 @@ export function GoogleMapComponent() {
       );
       const data = await response.json();
       setParks(data.parks);
-    } catch (error) {
+    } catch {
       // 公園の取得に失敗しました:
     }
   }, [currentLocation]);

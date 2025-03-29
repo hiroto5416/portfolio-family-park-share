@@ -1,5 +1,5 @@
-import { Park } from '@/types/park';
 import { NextResponse } from 'next/server';
+import { GooglePlace } from '@/types/park';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -22,14 +22,15 @@ export async function GET(request: Request) {
 
     const data = await response.json();
 
-    const parks = data.results.map((result: Park) => ({
+    const parks = data.results.map((result: GooglePlace) => ({
       place_id: result.place_id,
       name: result.name,
       vicinity: result.vicinity,
-      location: result.geometry.location,
+      formatted_address: result.formatted_address || result.vicinity,
+      location: result.geometry?.location || { lat: 0, lng: 0 },
       photos:
-        result.photos?.map((photo, index) => ({
-          id: `${result.place_id}-photo-${index}`,
+        result.photos?.map((photo) => ({
+          id: `${result.place_id}-photo-${photo.photo_reference}`,
           photo_reference: photo.photo_reference,
           height: photo.height,
           width: photo.width,

@@ -277,10 +277,12 @@ export default function ParkDetailPage() {
                 {currentReviews.map((review) => (
                   <ParkReview
                     key={review.id}
+                    id={review.id}
                     name={review.users.name}
                     content={review.content}
                     date={review.created_at}
                     images={review.review_images.map((img) => img.image_url)}
+                    likes={review.likes_count}
                   />
                 ))}
               </div>

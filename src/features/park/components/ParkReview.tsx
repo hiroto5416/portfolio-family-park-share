@@ -3,16 +3,80 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ThumbsUp } from 'lucide-react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface ParkReviewProps {
+  id: string;
   name: string;
   content: string;
   date: string;
   images: string[];
+  likes: number;
 }
 
-export function ParkReview({ name, content, date, images }: ParkReviewProps) {
+export function ParkReview({
+  id,
+  name,
+  content,
+  date,
+  images,
+  likes: initialLikes,
+}: ParkReviewProps) {
+  const { data: session } = useSession();
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(initialLikes);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // レビューのいいね状態を取得
+  useEffect(() => {
+    if (session?.user) {
+      fetchLikeStatus();
+    }
+  }, [session]);
+
+  const fetchLikeStatus = async () => {
+    try {
+      const response = await fetch(`/api/reviews/${id}/likes`);
+      if (response.ok) {
+        const data = await response.json();
+        setLiked(data.liked);
+      }
+    } catch (error) {
+      console.error('いいね状態の取得に失敗しました', error);
+    }
+  };
+
+  // いいねボタンのクリックハンドラ
+  const handleLikeClick = async () => {
+    if (!session?.user) {
+      // ログインしていない場合はログインページへリダイレクト
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/reviews/${id}/likes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLiked(data.liked);
+        // いいねの状態に応じていいね数を更新
+        setLikes((prev) => (data.liked ? prev + 1 : prev - 1));
+      }
+    } catch (error) {
+      console.error('いいねの更新に失敗しました', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-2">{name}</h3>
@@ -47,8 +111,15 @@ export function ParkReview({ name, content, date, images }: ParkReviewProps) {
       )}
 
       <div className="flex justify-between items-center">
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleLikeClick}
+          disabled={isLoading}
+          className={liked ? 'text-blue-500' : ''}
+        >
           <ThumbsUp className="h-5 w-5" />
+          <span className="ml-2">{likes}</span>
         </Button>
         <p className="text-sm text-muted-foreground">{date}</p>
       </div>

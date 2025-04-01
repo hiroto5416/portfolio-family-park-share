@@ -7,6 +7,8 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { UserReviews } from './UserReviews';
 import { useRouter } from 'next/navigation';
+// import { supabase } from '@/lib/supabase';
+import { uploadAvatar } from '@/lib/uploadAvatar';
 
 interface AccountTabProps {
   initialData: {
@@ -42,6 +44,9 @@ export function AccountTab({ initialData }: AccountTabProps) {
   const [formData, setFormData] = useState({
     name: initialData.name,
   });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   async function fetchUserReviews(userId: string) {
     setIsLoading(true);
@@ -89,6 +94,28 @@ export function AccountTab({ initialData }: AccountTabProps) {
     });
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // ファイルサイズチェック（例：5MB以下）
+      if (file.size > 5 * 1024 * 1024) {
+        setError('画像サイズは5MB以下にしてください');
+        return;
+      }
+
+      // ファイルタイプチェック
+      if (!file.type.startsWith('image/')) {
+        setError('画像ファイルを選択してください');
+        return;
+      }
+
+      setAvatarFile(file);
+      // プレビューURLの作成
+      const previewUrl = URL.createObjectURL(file);
+      setAvatarPreview(previewUrl);
+    }
+  };
+
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -96,20 +123,51 @@ export function AccountTab({ initialData }: AccountTabProps) {
     setSuccess('');
 
     try {
+      let avatarUrl = null;
+
+      if (avatarFile) {
+        try {
+          // ファイルサイズチェック
+          if (avatarFile.size > 5 * 1024 * 1024) {
+            // 5MB制限
+            throw new Error('ファイルサイズは5MB以下にしてください');
+          }
+
+          // ファイルタイプチェック
+          if (!avatarFile.type.startsWith('image/')) {
+            throw new Error('画像ファイルを選択してください');
+          }
+
+          avatarUrl = await uploadAvatar(avatarFile, initialData.id);
+        } catch (error) {
+          console.error('Upload error:', error);
+          throw new Error(
+            error instanceof Error ? error.message : '画像のアップロードに失敗しました'
+          );
+        }
+      }
+
+      // プロフィール更新APIを呼び出し
       const response = await fetch('/api/user/update-profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name }),
+        body: JSON.stringify({
+          name: formData.name,
+          avatarUrl: avatarUrl,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('プロフィールの更新に失敗しました');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'プロフィールの更新に失敗しました');
       }
 
       setSuccess('プロフィールを更新しました');
+      setIsEditing(false);
       router.refresh();
     } catch (error) {
-      setError(error instanceof Error ? error.message : '更新に失敗しました');
+      console.error('Profile update error:', error);
+      setError(error instanceof Error ? error.message : 'プロフィール更新中にエラーが発生しました');
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +190,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              disabled={!isLoading}
+              disabled={!isEditing}
             />
           </div>
 
@@ -143,29 +201,48 @@ export function AccountTab({ initialData }: AccountTabProps) {
               type="email"
               value={initialData.email}
               onChange={handleChange}
-              disabled={!isLoading}
+              disabled={!isEditing}
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">プロフィール画像</label>
-            <Input type="file" accept="image/*" className="cursor-pointer" disabled={!isLoading} />
+            <div className="flex items-center gap-4">
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="プロフィール画像プレビュー"
+                  className="w-20 h-20 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-10 h-10 text-gray-400" />
+                </div>
+              )}
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="cursor-pointer"
+                disabled={!isEditing}
+              />
+            </div>
           </div>
 
           {/* ボタングループ */}
           <div className="mt-6">
             {/* モバイル表示用 */}
             <div className="md:hidden space-y-2">
-              {!isLoading ? (
-                <Button onClick={() => setIsLoading(true)} className="w-full">
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)} className="w-full">
                   変更
                 </Button>
               ) : (
                 <>
-                  <Button onClick={handleProfileUpdate} className="w-full">
+                  <Button onClick={handleProfileUpdate} className="w-full" disabled={isLoading}>
                     保存
                   </Button>
-                  <Button variant="outline" onClick={() => setIsLoading(false)} className="w-full">
+                  <Button variant="outline" onClick={() => setIsEditing(false)} className="w-full">
                     キャンセル
                   </Button>
                 </>
@@ -174,14 +251,16 @@ export function AccountTab({ initialData }: AccountTabProps) {
 
             {/* デスクトップ表示用 */}
             <div className="hidden md:flex justify-end gap-4">
-              {!isLoading ? (
-                <Button onClick={() => setIsLoading(true)}>変更</Button>
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)}>変更</Button>
               ) : (
                 <>
-                  <Button variant="outline" onClick={() => setIsLoading(false)}>
+                  <Button variant="outline" onClick={() => setIsEditing(false)}>
                     キャンセル
                   </Button>
-                  <Button onClick={handleProfileUpdate}>保存</Button>
+                  <Button onClick={handleProfileUpdate} disabled={isLoading}>
+                    保存
+                  </Button>
                 </>
               )}
             </div>

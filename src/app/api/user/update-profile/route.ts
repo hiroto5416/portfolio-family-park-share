@@ -1,26 +1,41 @@
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function PUT(request: Request) {
   try {
-    // セッションからユーザー情報を取得
-    const session = await getServerSession();
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
+    const { name, avatarUrl } = await request.json();
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: '認証が必要です' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    const body = await request.json();
-    const { name } = body;
+    const { error } = await supabase
+      .from('users')
+      .update({
+        name,
+        avatar_url: avatarUrl,
+      })
+      .eq('id', user.id);
 
-    // ユーザー情報を更新
-    const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
-      data: { name: name },
+    if (error) throw error;
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    return NextResponse.json({ user: updatedUser });
   } catch {
-    return NextResponse.json({ error: 'プロフィールの更新に失敗しました' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'プロフィールの更新に失敗しました' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Lock, MapPin } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import React, { useState } from 'react';
+// import { MapPin } from 'lucide-react';
+// import { Switch } from '@/components/ui/switch';
 
 interface PasswordForm {
   currentPassword: string;
@@ -12,7 +13,7 @@ interface PasswordForm {
 }
 
 export const SettingsTab = () => {
-  const [locationEnabled, setLocationEnabled] = useState(false);
+  // const [locationEnabled, setLocationEnabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -167,7 +168,7 @@ export const SettingsTab = () => {
         )}
       </Card>
 
-      <Card className="p-6">
+      {/* <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <MapPin className="h-5 w-5 text-muted-foreground" />
@@ -179,7 +180,7 @@ export const SettingsTab = () => {
           位置情報を利用すると、近くの公園を簡単に見つけることができます。
           この設定はいつでも変更できます。
         </p>
-      </Card>
+      </Card> */}
     </div>
   );
 };

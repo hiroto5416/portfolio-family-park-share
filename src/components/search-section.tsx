@@ -49,7 +49,7 @@ export function SearchSection() {
         {error && <div className="text-center py-4 text-red-500">{error}</div>}
 
         {!isLoading && !error && results.length > 0 && (
-          <div className="space-y-2 bg-green-50">
+          <div className="space-y-1.5 bg-green-50">
             {results.slice(0, 5).map((park) => {
               const parkId = park.place_id;
               const hasImageError = imageErrors[parkId];
@@ -61,15 +61,15 @@ export function SearchSection() {
                   key={parkId}
                   className="block hover:bg-gray-100 transition-colors"
                 >
-                  <div className="flex items-start space-x-4 p-4 cursor-pointer border-b border-gray-200 last:border-b-0">
-                    <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
+                  <div className="flex items-start space-x-3 p-3 cursor-pointer border-b border-gray-200 last:border-b-0">
+                    <div className="h-14 w-14 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
                       {photoReference && !hasImageError ? (
                         <Image
                           loader={googlePlacesLoader}
                           src={getPhotoUrl(photoReference)}
                           alt={park.name}
-                          width={64}
-                          height={64}
+                          width={56}
+                          height={56}
                           className="object-cover h-full w-full"
                           onError={() => handleImageError(parkId)}
                           unoptimized

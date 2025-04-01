@@ -33,7 +33,7 @@ export function ParkReview({
     if (session?.user) {
       fetchLikeStatus();
     }
-  }, [session]);
+  }, [session, id]);
 
   const fetchLikeStatus = async () => {
     try {

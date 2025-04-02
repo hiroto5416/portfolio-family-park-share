@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
 type RouteContext = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 /**
@@ -16,7 +16,8 @@ type RouteContext = {
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const id = context.params.id;
+    const p = await context.params;
+    const id = p.id;
     console.log('Fetching reviews for park:', id);
 
     // 1. 公園IDの確認（place_idからidへの変換）

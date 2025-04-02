@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { NextRequest } from 'next/server';
+
+type RouteContext = {
+  params: {
+    id: string;
+  };
+};
 
 /**
  * 公園のレビューを取得するAPI
- * @param request リクエスト
- * @param params パラメータ（公園ID）
+ * @param _request リクエスト（未使用）
+ * @param context パラメータ（公園IDを含む）
  * @returns レビューのリスト
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     console.log('Fetching reviews for park:', id);
 
     // 1. 公園IDの確認（place_idからidへの変換）

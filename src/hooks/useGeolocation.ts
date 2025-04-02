@@ -45,8 +45,8 @@ export const useGeolocation = () => {
           isLocationServiceEnabled: true,
         }));
       },
-      (error) => {
-        let errorMessage =
+      () => {
+        const errorMessage =
           '位置情報サービスがオフになっています。\n位置情報をオンにすると、あなたの近くの公園を表示できます。';
         setState((prev) => ({
           ...prev,

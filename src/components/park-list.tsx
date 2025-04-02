@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Park } from '@/types/park';
 import Link from 'next/link';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { LocationWarning } from '@/components/LocationWarning';
 
 // 画像ローダーを定義することで、外部URLでもNext.js Imageコンポーネントを使用できるようにする
 const googlePlacesLoader = ({ src }: { src: string }) => {
@@ -13,96 +15,98 @@ const googlePlacesLoader = ({ src }: { src: string }) => {
 export function ParkList() {
   const [parks, setParks] = useState<Park[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const { location, error, isDefaultLocation } = useGeolocation();
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`/api/places?lat=${latitude}&lng=${longitude}`);
+  React.useEffect(() => {
+    if (location) {
+      fetchParks(location.lat, location.lng);
+    }
+  }, [location]);
 
-          if (!response.ok) {
-            throw new Error(`API returned ${response.status}`);
-          }
-
-          const data = await response.json();
-
-          if (data.error) {
-            setError(data.error);
-          } else {
-            setParks(data.parks);
-          }
-        } catch (err) {
-          console.error('公園データ取得エラー:', err);
-          setError('公園の検索に失敗しました');
-        } finally {
-          setLoading(false);
-        }
-      },
-      (geoErr) => {
-        console.error('位置情報エラー:', geoErr);
-        setError('位置情報の取得に失敗しました');
-        setLoading(false);
-      }
-    );
-  }, []);
-
-  const handleImageError = (parkId: string | number) => {
-    setImageErrors((prev) => ({ ...prev, [parkId]: true }));
-  };
-
-  // 安全なURL生成と参照チェック
-  const getPhotoUrl = (photoReference: string) => {
-    if (!photoReference) return '';
+  const fetchParks = async (lat: number, lng: number) => {
     try {
-      return `/api/photo?reference=${encodeURIComponent(photoReference)}`;
-    } catch (e) {
-      console.error('Photo reference encoding error:', e);
-      return '';
+      const response = await fetch(`/api/places?lat=${lat}&lng=${lng}`);
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.error) {
+        console.error('公園データ取得エラー:', data.error);
+      } else {
+        setParks(data.parks);
+      }
+    } catch (err) {
+      console.error('公園データ取得エラー:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center py-4">読み込み中...</div>;
-  if (error) return <div className="text-center py-4 text-red-500">{error}</div>;
-  if (parks.length === 0)
-    return <div className="text-center py-4">近くに公園が見つかりませんでした</div>;
+  if (loading) {
+    return <div className="text-center py-4">読み込み中...</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      {parks.map((park, index) => {
-        const parkId = park.place_id || `park-${index}`;
-        const hasImageError = imageErrors[parkId];
-        const photoReference = park.photos?.[0]?.photo_reference;
-
-        return (
-          <Link href={`/parks/${encodeURIComponent(park.place_id) || ''}`} key={parkId} passHref>
-            <div className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
-              <div className="h-16 w-16 relative rounded-md overflow-hidden flex-shrink-0 bg-gray-100 flex items-center justify-center">
-                {photoReference && !hasImageError ? (
-                  <Image
-                    loader={googlePlacesLoader}
-                    src={getPhotoUrl(photoReference)}
-                    alt={park.name}
-                    width={64}
-                    height={64}
-                    className="object-cover h-full w-full"
-                    onError={() => handleImageError(parkId)}
-                    unoptimized // 重要: Next.jsの最適化をバイパスして元の画像を表示
-                  />
-                ) : (
-                  <span className="text-xs text-gray-500">No Image</span>
-                )}
+    <div className="relative">
+      <div className="space-y-2">
+        {parks.length === 0 ? (
+          <div className="text-center py-4">
+            {isDefaultLocation
+              ? '東京駅周辺の公園が見つかりませんでした'
+              : '近くの公園が見つかりませんでした'}
+          </div>
+        ) : (
+          parks.map((park, index) => (
+            <Link
+              key={index}
+              href={`/parks/${park.place_id}`}
+              className="block bg-white hover:bg-gray-50 transition-colors duration-200"
+            >
+              <div className="flex items-start space-x-4 p-4">
+                <div className="relative h-16 w-16 flex-shrink-0">
+                  {park.photos && park.photos[0] && !imageErrors[park.place_id] ? (
+                    <Image
+                      src={`/api/photo?reference=${encodeURIComponent(park.photos[0].photo_reference)}`}
+                      alt={park.name}
+                      fill
+                      className="object-cover rounded-md"
+                      loader={googlePlacesLoader}
+                      onError={() => {
+                        setImageErrors((prev) => ({ ...prev, [park.place_id]: true }));
+                      }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gray-200 rounded-md flex items-center justify-center">
+                      <span className="text-xs text-gray-400">No image</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900 truncate">{park.name}</h3>
+                  {park.vicinity && (
+                    <p className="text-sm text-gray-500 truncate mt-1">{park.vicinity}</p>
+                  )}
+                  {park.rating && (
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <span className="mr-1">★</span>
+                      <span>{park.rating}</span>
+                      {park.userRatingsTotal && (
+                        <span className="ml-1">({park.userRatingsTotal}件)</span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex-grow min-w-0">
-                <h4 className="font-medium text-gray-900 truncate">{park.name}</h4>
-                <p className="text-sm text-gray-500 truncate">{park.vicinity}</p>
-              </div>
-            </div>
-          </Link>
-        );
-      })}
+            </Link>
+          ))
+        )}
+      </div>
+      {error && (
+        <div className="absolute top-0 left-0 right-0 z-10">
+          <LocationWarning message={error} isDefaultLocation={isDefaultLocation} />
+        </div>
+      )}
     </div>
   );
 }

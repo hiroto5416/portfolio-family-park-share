@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { User } from 'lucide-react';
 import { UserReviews } from './UserReviews';
 import { useRouter } from 'next/navigation';
-// import { supabase } from '@/lib/supabase';
+import { useSession, signOut } from 'next-auth/react';
 import { uploadAvatar } from '@/lib/uploadAvatar';
 
 interface AccountTabProps {
@@ -37,12 +37,14 @@ interface Review {
 
 export function AccountTab({ initialData }: AccountTabProps) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [formData, setFormData] = useState({
     name: initialData.name,
+    email: initialData.email,
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -118,6 +120,11 @@ export function AccountTab({ initialData }: AccountTabProps) {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!session) {
+      setError('認証が必要です');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setSuccess('');
@@ -147,12 +154,24 @@ export function AccountTab({ initialData }: AccountTabProps) {
         }
       }
 
+      // メールアドレスのバリデーション
+      if (formData.email !== initialData.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          throw new Error('有効なメールアドレスを入力してください');
+        }
+      }
+
       // プロフィール更新APIを呼び出し
       const response = await fetch('/api/user/update-profile', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify({
           name: formData.name,
+          email: formData.email,
           avatarUrl: avatarUrl,
         }),
       });
@@ -163,6 +182,14 @@ export function AccountTab({ initialData }: AccountTabProps) {
       }
 
       setSuccess('プロフィールを更新しました');
+
+      // メールアドレスが変更された場合は、再ログインを要求
+      if (formData.email !== initialData.email) {
+        await signOut({ redirect: false });
+        router.push('/login?message=メールアドレスを変更しました。再度ログインしてください。');
+        return;
+      }
+
       setIsEditing(false);
       router.refresh();
     } catch (error) {
@@ -199,7 +226,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
             <Input
               name="email"
               type="email"
-              value={initialData.email}
+              value={formData.email}
               onChange={handleChange}
               disabled={!isEditing}
             />

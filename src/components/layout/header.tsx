@@ -45,12 +45,12 @@ export function Header() {
               <>
                 <Link href="/mypage">
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90">
-                    <User className="mr-1 h-4 w-4" />
+                    <User className="mr-1 h-5 w-5" />
                     マイページ
                   </Button>
                 </Link>
                 <Button variant="default" size="sm" onClick={handleLogout}>
-                  <LogOut className="mr-1 h-4 w-4" />
+                  <LogOut className="mr-1 h-5 w-5" />
                   ログアウト
                 </Button>
               </>

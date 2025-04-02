@@ -40,6 +40,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         user: {
           select: {
             name: true,
+            avatarUrl: true,
           },
         },
         images: {
@@ -65,8 +66,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       created_at: review.createdAt.toISOString(),
       likes_count: review.likesCount,
       users: {
-        // フロントエンドが users を期待しているため
         name: review.user.name,
+        image: review.user.avatarUrl,
       },
       review_images: review.images.map((image) => ({
         image_url: image.imageUrl,

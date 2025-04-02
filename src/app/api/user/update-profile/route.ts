@@ -1,13 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 export async function PUT(request: Request) {
   try {
-    const { name, avatarUrl, email } = await request.json();
+    const { name, email } = await request.json();
 
     // セッション情報を取得
     const session = await getServerSession(authOptions);
@@ -18,20 +15,30 @@ export async function PUT(request: Request) {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // メールアドレスが変更される場合、重複チェック
+    if (email && email !== session.user.email) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
 
-    // usersテーブルを直接更新
-    const { error } = await supabase
-      .from('users')
-      .update({
-        name,
-        avatar_url: avatarUrl,
-        email: email || session.user.email,
-      })
-      .eq('email', session.user.email);
+      if (existingUser) {
+        return new Response(JSON.stringify({ error: 'このメールアドレスは既に使用されています' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
-    if (error) {
-      console.error('Update error:', error);
+    // Prismaを使用してユーザー情報を更新
+    const updatedUser = await prisma.user.update({
+      where: { email: session.user.email },
+      data: {
+        name: name || undefined,
+        email: email || undefined,
+      },
+    });
+
+    if (!updatedUser) {
       return new Response(JSON.stringify({ error: 'プロフィールの更新に失敗しました' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

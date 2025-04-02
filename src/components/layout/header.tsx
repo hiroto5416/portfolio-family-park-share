@@ -28,42 +28,42 @@ export function Header() {
         !isVisible && 'md:transform-none -translate-y-full'
       )}
     >
-      <div className="max-w-container mx-auto px-4 h-16 flex items-center justify-between md:justify-start md:gap-8">
+      <div className="max-w-container mx-auto px-4 h-14 flex items-center justify-between md:justify-start md:gap-6">
         {/* ロゴ */}
         <Link
           href="/"
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity md:flex-none mx-auto md:mx-0"
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity md:flex-none mx-auto md:mx-0"
         >
-          <Trees className="h-7 w-7 text-primary" aria-hidden="true" />
-          <span className="text-2xl font-bold text-primary">FAMILY PARK SHARE</span>
+          <Trees className="h-6 w-6 text-primary" aria-hidden="true" />
+          <span className="text-xl font-bold text-primary">FAMILY PARK SHARE</span>
         </Link>
 
         {/* デスクトップメニュー */}
         {shouldShowAuthButtons && (
-          <div className="hidden md:flex items-center gap-4 ml-auto">
+          <div className="hidden md:flex items-center gap-3 ml-auto">
             {session ? (
               <>
                 <Link href="/mypage">
-                  <Button variant="ghost" className="text-primary hover:text-primary/90">
-                    <User className="mr-1 h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90">
+                    <User className="mr-1 h-5 w-5" />
                     マイページ
                   </Button>
                 </Link>
-                <Button variant="default" onClick={handleLogout}>
-                  <LogOut className="mr-1 h-4 w-4" />
+                <Button variant="default" size="sm" onClick={handleLogout}>
+                  <LogOut className="mr-1 h-5 w-5" />
                   ログアウト
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" className="text-primary hover:text-primary/90">
+                  <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90">
                     <LogIn className="mr-1 h-4 w-4" />
                     ログイン
                   </Button>
                 </Link>
                 <Link href="/signin">
-                  <Button variant="default">
+                  <Button variant="default" size="sm">
                     <UserPlus className="mr-1 h-4 w-4" />
                     新規登録
                   </Button>
@@ -76,19 +76,19 @@ export function Header() {
 
       {/* モバイル用ボタン */}
       {shouldShowAuthButtons && (
-        <div className="md:hidden flex justify-end gap-3 p-2">
+        <div className="md:hidden flex justify-end gap-2 px-2 py-1.5">
           {session ? (
             <>
               <Link href="/mypage">
                 <Button
                   variant="ghost"
-                  className="text-xs h-7 px-2 text-primary hover:text-primary/90"
+                  className="text-xs h-6 px-2 text-primary hover:text-primary/90"
                 >
                   <User className="mr-1 h-3 w-3" />
                   マイページ
                 </Button>
               </Link>
-              <Button variant="default" className="text-xs h-7 px-2" onClick={handleLogout}>
+              <Button variant="default" className="text-xs h-6 px-2" onClick={handleLogout}>
                 <LogOut className="mr-1 h-3 w-3" />
                 ログアウト
               </Button>
@@ -98,14 +98,14 @@ export function Header() {
               <Link href="/login">
                 <Button
                   variant="ghost"
-                  className="text-xs h-7 px-2 text-primary hover:text-primary/90"
+                  className="text-xs h-6 px-2 text-primary hover:text-primary/90"
                 >
                   <LogIn className="mr-1 h-3 w-3" />
                   ログイン
                 </Button>
               </Link>
               <Link href="/signin">
-                <Button variant="default" className="text-xs h-7 px-2">
+                <Button variant="default" className="text-xs h-6 px-2">
                   <UserPlus className="mr-1 h-3 w-3" />
                   新規登録
                 </Button>

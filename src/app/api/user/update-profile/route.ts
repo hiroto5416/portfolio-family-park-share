@@ -1,26 +1,52 @@
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@supabase/supabase-js';
 import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function PUT(request: Request) {
   try {
-    // セッションからユーザー情報を取得
-    const session = await getServerSession();
+    const { name, avatarUrl, email } = await request.json();
+
+    // セッション情報を取得
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
+      return new Response(JSON.stringify({ error: '認証が必要です' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    const body = await request.json();
-    const { name } = body;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // ユーザー情報を更新
-    const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
-      data: { name: name },
+    // usersテーブルを直接更新
+    const { error } = await supabase
+      .from('users')
+      .update({
+        name,
+        avatar_url: avatarUrl,
+        email: email || session.user.email,
+      })
+      .eq('email', session.user.email);
+
+    if (error) {
+      console.error('Update error:', error);
+      return new Response(JSON.stringify({ error: 'プロフィールの更新に失敗しました' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    return NextResponse.json({ user: updatedUser });
-  } catch {
-    return NextResponse.json({ error: 'プロフィールの更新に失敗しました' }, { status: 500 });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return new Response(JSON.stringify({ error: 'プロフィールの更新に失敗しました' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

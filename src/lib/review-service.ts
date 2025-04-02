@@ -69,7 +69,7 @@ export async function updateReview(reviewId: string, content: string) {
     .eq('user_id', session.user.id)
     .single();
 
-  if (usesError || !usesData) {
+  if (usersError || !usersData) {
     throw new Error('プロファイルデータの取得に失敗しました');
   }
 
@@ -85,7 +85,7 @@ export async function updateReview(reviewId: string, content: string) {
   }
 
   // ログインユーザーのプロファイルIDとレビューの作成者IDが一致するか確認
-  if (existingReview.user_id !== usesData.id) {
+  if (existingReview.user_id !== usersData.id) {
     throw new Error('このレビューを編集する権限がありません');
   }
 

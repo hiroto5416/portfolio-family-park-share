@@ -33,6 +33,7 @@ interface Review {
   likes_count: number;
   users: {
     name: string;
+    image: string;
   };
   review_images: {
     image_url: string;
@@ -283,6 +284,7 @@ export default function ParkDetailPage() {
                     date={review.created_at}
                     images={review.review_images.map((img) => img.image_url)}
                     likes={review.likes_count}
+                    image={review.users.image}
                   />
                 ))}
               </div>

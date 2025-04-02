@@ -42,6 +42,7 @@ export const authOptions: AuthOptions = {
         if (!isPasswordValid) {
           throw new Error('メールアドレスまたはパスワードが正しくありません');
         }
+
         // 認証成功：すべて正しければユーザー情報を返す（これがセッションに保存される）
         return {
           id: user.id,

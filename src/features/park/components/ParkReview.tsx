@@ -13,6 +13,7 @@ interface ParkReviewProps {
   date: string;
   images: string[];
   likes: number;
+  image?: string;
 }
 
 export function ParkReview({
@@ -22,6 +23,7 @@ export function ParkReview({
   date,
   images,
   likes: initialLikes,
+  image,
 }: ParkReviewProps) {
   const { data: session } = useSession();
   const [liked, setLiked] = useState(false);
@@ -79,7 +81,28 @@ export function ParkReview({
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-2">{name}</h3>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image}
+              alt={`${name}のプロフィール画像`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error(`プロフィール画像の読み込みに失敗しました: ${image}`);
+                e.currentTarget.src =
+                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlZWVlZWUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5OTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7nlLvpnaI8L3RleHQ+PC9zdmc+';
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500 text-sm">{name[0]}</span>
+            </div>
+          )}
+        </div>
+        <h3 className="text-lg font-semibold">{name}</h3>
+      </div>
 
       <p className="whitespace-pre-line mb-4 text-muted-foreground">{content}</p>
 

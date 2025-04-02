@@ -15,6 +15,7 @@ interface AccountTabProps {
     name: string;
     email: string;
     id: string;
+    avatar_url?: string | null;
   };
 }
 
@@ -47,7 +48,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
     email: initialData.email,
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData.avatar_url || null);
   const [isEditing, setIsEditing] = useState(false);
 
   async function fetchUserReviews(userId: string) {
@@ -239,11 +240,11 @@ export function AccountTab({ initialData }: AccountTabProps) {
                 <img
                   src={avatarPreview}
                   alt="プロフィール画像プレビュー"
-                  className="w-20 h-20 rounded-full object-cover"
+                  className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="w-10 h-10 text-gray-400" />
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-8 h-8 text-gray-400" />
                 </div>
               )}
               <Input

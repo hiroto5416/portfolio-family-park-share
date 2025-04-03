@@ -1,11 +1,22 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+// RouteContext型の定義
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    // デバッグ用にパラメータを確認
-    console.log('Received request for park ID:', params.id);
+    // Promiseからパラメータを取得
+    const p = await context.params;
+    const placeId = p.id;
 
-    const placeId = params.id;
+    // デバッグ用にパラメータを確認
+    console.log('Received request for park ID:', placeId);
+
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
     if (!apiKey) {

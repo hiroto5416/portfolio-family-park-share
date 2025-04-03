@@ -5,10 +5,19 @@ import { prisma } from '@/lib/prisma';
 import { uploadReviewImages } from '@/lib/uploadImage';
 import { createClient } from '@supabase/supabase-js';
 
+// RouteContext型の定義
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
 // レビュー更新
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const reviewId = params.id;
+    // Promiseからパラメータを取得
+    const p = await context.params;
+    const reviewId = p.id;
 
     // NextAuthでのセッション確認
     const session = await getServerSession(authOptions);
@@ -110,8 +119,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // レビュー削除 - 同様にNextAuth認証に変更
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  const reviewId = params.id;
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  // Promiseからパラメータを取得
+  const p = await context.params;
+  const reviewId = p.id;
 
   if (!reviewId) {
     return NextResponse.json({ error: 'レビューIDが必要です' }, { status: 400 });

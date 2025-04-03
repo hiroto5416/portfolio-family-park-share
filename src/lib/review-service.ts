@@ -1,11 +1,23 @@
 // src/lib/review-service.ts
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+// import {  } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
 
 // ユーザーのレビュー取得関数（二段階検索）
 export async function getUserReviews() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
 
   // セッションからユーザーIDを取得
   const {
@@ -51,7 +63,18 @@ export async function getUserReviews() {
 
 // レビュー更新関数（二段階検索を使用）
 export async function updateReview(reviewId: string, content: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
 
   // セッションからユーザーIDを取得
   const {
@@ -107,7 +130,18 @@ export async function updateReview(reviewId: string, content: string) {
 
 // レビュー削除関数（二段階検索を使用）
 export async function deleteReview(reviewId: string) {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
 
   // セッションからユーザーIDを取得
   const {
@@ -164,7 +198,18 @@ export async function deleteReview(reviewId: string) {
 
 // 新しいレビュー作成関数（二段階検索を使用）
 export async function createReview(parkId: string, content: string, imageUrls?: string[]) {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
+    }
+  );
 
   // セッションからユーザーIDを取得
   const {

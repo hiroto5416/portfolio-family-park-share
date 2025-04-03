@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-// import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { authOptions } from '@/lib/auth';
 
+// RouteContext型の定義
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
 // いいね状態の取得
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
+    // Promiseからパラメータを取得
+    const p = await context.params;
+    const reviewId = p.id;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
-
-    const reviewId = params.id;
 
     // ユーザー情報の取得
     const user = await prisma.user.findUnique({
@@ -41,14 +49,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 }
 
 // いいねのトグル（追加/削除）
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    // Promiseからパラメータを取得
+    const p = await context.params;
+    const reviewId = p.id;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
-
-    const reviewId = params.id;
 
     // ユーザー情報の取得
     const user = await prisma.user.findUnique({

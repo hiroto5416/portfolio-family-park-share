@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ThumbsUp } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface ParkReviewProps {
@@ -30,14 +30,7 @@ export function ParkReview({
   const [likes, setLikes] = useState(initialLikes);
   const [isLoading, setIsLoading] = useState(false);
 
-  // レビューのいいね状態を取得
-  useEffect(() => {
-    if (session?.user) {
-      fetchLikeStatus();
-    }
-  }, [session, id]);
-
-  const fetchLikeStatus = async () => {
+  const fetchLikeStatus = useCallback(async () => {
     try {
       const response = await fetch(`/api/reviews/${id}/likes`);
       if (response.ok) {
@@ -47,7 +40,13 @@ export function ParkReview({
     } catch (error) {
       console.error('いいね状態の取得に失敗しました', error);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetchLikeStatus();
+    }
+  }, [session, fetchLikeStatus]);
 
   // いいねボタンのクリックハンドラ
   const handleLikeClick = async () => {

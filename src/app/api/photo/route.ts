@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const reference = searchParams.get('reference');
+  const width = searchParams.get('width');
 
   if (!reference) {
     return NextResponse.json({ error: '写真参照IDが必要です' }, { status: 400 });
@@ -17,7 +18,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'サーバー設定エラー' }, { status: 500 });
     }
 
-    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${reference}&key=${apiKey}`;
+    const maxWidth = width ? Math.min(Number(width), 1600) : 400;
+    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${reference}&key=${apiKey}`;
 
     const response = await fetch(photoUrl);
 

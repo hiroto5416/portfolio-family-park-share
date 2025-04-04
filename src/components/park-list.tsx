@@ -8,8 +8,13 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { LocationWarning } from '@/components/LocationWarning';
 
 // 画像ローダーを定義することで、外部URLでもNext.js Imageコンポーネントを使用できるようにする
-const googlePlacesLoader = ({ src }: { src: string }) => {
-  return src;
+const googlePlacesLoader = ({ src, width }: { src: string; width: number }) => {
+  // 相対パスの場合は絶対パスに変換
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const fullUrl = src.startsWith('/') ? `${baseUrl}${src}` : src;
+  const url = new URL(fullUrl);
+  const reference = url.searchParams.get('reference');
+  return `/api/photo?reference=${reference}&width=${width}`;
 };
 
 export function ParkList() {
@@ -70,6 +75,7 @@ export function ParkList() {
                       src={`/api/photo?reference=${encodeURIComponent(park.photos[0].photo_reference)}`}
                       alt={park.name}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover rounded-md"
                       loader={googlePlacesLoader}
                       onError={() => {

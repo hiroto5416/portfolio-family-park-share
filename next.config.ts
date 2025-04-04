@@ -11,6 +11,29 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // WASMモジュールの設定
+    config.experiments = {
+      asyncWebAssembly: true,
+      layers: true,
+    };
+
+    // クライアントサイドでのWASMモジュールのロード設定
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+
+    return config;
+  },
+  // Fast Refreshのログを抑制
+  reactStrictMode: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 };
 
 export default nextConfig;

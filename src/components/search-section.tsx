@@ -6,9 +6,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
-// 画像ローダーの定義
-const googlePlacesLoader = ({ src }: { src: string }) => {
-  return src;
+// 画像ローダーを定義することで、外部URLでもNext.js Imageコンポーネントを使用できるようにする
+const googlePlacesLoader = ({ src, width }: { src: string; width: number }) => {
+  // 相対パスの場合は絶対パスに変換
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const fullUrl = src.startsWith('/') ? `${baseUrl}${src}` : src;
+  const url = new URL(fullUrl);
+  const reference = url.searchParams.get('reference');
+  return `/api/photo?reference=${reference}&width=${width}`;
 };
 
 export function SearchSection() {
@@ -70,6 +75,7 @@ export function SearchSection() {
                           alt={park.name}
                           width={56}
                           height={56}
+                          sizes="56px"
                           className="object-cover h-full w-full"
                           onError={() => handleImageError(parkId)}
                           unoptimized

@@ -52,6 +52,8 @@ export async function POST(request: NextRequest) {
         contentType: contentType || 'image/svg+xml',
       });
 
+    console.log(uploadError?.message);
+
     if (uploadError) {
       console.error('Upload error details:', uploadError);
       return NextResponse.json(

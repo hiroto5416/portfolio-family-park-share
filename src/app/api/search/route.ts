@@ -40,7 +40,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ results: parks });
   } catch (error) {
-    console.error('API検索エラー:', error);
-    return NextResponse.json({ error: '検索中にエラーが発生しました' }, { status: 500 });
+    console.error('検索エラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json({ error: `検索に失敗しました: ${errorMessage}` }, { status: 500 });
   }
 }

@@ -54,7 +54,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ user: { id: user.id, email: user.email, name: user.name } });
   } catch (error) {
-    console.error('Signup error:', error instanceof Error ? error.message : 'Unknown error');
-    return NextResponse.json({ error: '登録に失敗しました' }, { status: 500 });
+    console.error('サインアップエラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `サインアップに失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

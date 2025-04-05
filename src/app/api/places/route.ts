@@ -39,7 +39,11 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ parks: parks.slice(0, 5) });
   } catch (error) {
-    console.error('Error fetching places:', error);
-    return NextResponse.json({ error: 'Failed to fetch places' }, { status: 500 });
+    console.error('Review fetch error:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `レビューの取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

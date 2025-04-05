@@ -131,46 +131,52 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     // 成功時はレビューデータを返す
     return NextResponse.json({ reviews: formattedReviews || [] });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('Review fetch error:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        // 環境変数の存在確認
-        env: {
-          DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-          DIRECT_URL_EXISTS: !!process.env.DIRECT_URL,
-          NODE_ENV: process.env.NODE_ENV,
-        },
-      });
+    console.error('公園のレビュー取得エラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `公園のレビューの取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
+    // if (error instanceof Error) {
+    //   console.error('Review fetch error:', {
+    //     message: error.message,
+    //     name: error.name,
+    //     stack: error.stack,
+    //     // 環境変数の存在確認
+    //     env: {
+    //       DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+    //       DIRECT_URL_EXISTS: !!process.env.DIRECT_URL,
+    //       NODE_ENV: process.env.NODE_ENV,
+    //     },
+    //   });
 
-      // エラータイプに応じたレスポンス
-      if (error.message === 'PARK_NOT_FOUND') {
-        return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
-      }
+    //   // エラータイプに応じたレスポンス
+    //   if (error.message === 'PARK_NOT_FOUND') {
+    //     return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
+    //   }
 
-      if (
-        error.name &&
-        error.name.includes('Prisma') &&
-        (error.message.includes('connection') || error.message.includes('database'))
-      ) {
-        return NextResponse.json(
-          { error: 'データベースへの接続に失敗しました。しばらくしてからお試しください。' },
-          { status: 503 } // Service Unavailable
-        );
-      }
+    //   if (
+    //     error.name &&
+    //     error.name.includes('Prisma') &&
+    //     (error.message.includes('connection') || error.message.includes('database'))
+    //   ) {
+    //     return NextResponse.json(
+    //       { error: 'データベースへの接続に失敗しました。しばらくしてからお試しください。' },
+    //       { status: 503 } // Service Unavailable
+    //     );
+    //   }
 
-      const errorMessage = error.message;
-      return NextResponse.json(
-        { error: `レビューの取得に失敗しました: ${errorMessage}` },
-        { status: 500 }
-      );
-    } else {
-      console.error('不明なエラーが発生しました:', error);
-      return NextResponse.json(
-        { error: 'レビューの取得に失敗しました: 不明なエラー' },
-        { status: 500 }
-      );
-    }
+    //   const errorMessage = error.message;
+    //   return NextResponse.json(
+    //     { error: `レビューの取得に失敗しました: ${errorMessage}` },
+    //     { status: 500 }
+    //   );
+    // } else {
+    //   console.error('不明なエラーが発生しました:', error);
+    //   return NextResponse.json(
+    //     { error: 'レビューの取得に失敗しました: 不明なエラー' },
+    //     { status: 500 }
+    //   );
+    // }
   }
 }

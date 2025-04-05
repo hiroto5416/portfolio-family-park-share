@@ -28,7 +28,11 @@ export async function GET() {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error('User data fetch error:', error);
-    return NextResponse.json({ error: 'ユーザーデータの取得に失敗しました' }, { status: 500 });
+    console.error('ユーザー情報取得エラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `ユーザー情報の取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

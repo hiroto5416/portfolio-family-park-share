@@ -51,7 +51,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
   } catch (error) {
-    console.error('Error in parks API:', error);
-    return NextResponse.json({ error: '公園情報の取得に失敗しました' }, { status: 500 });
+    console.error('公園情報取得エラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `公園情報の取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

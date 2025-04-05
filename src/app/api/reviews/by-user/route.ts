@@ -60,7 +60,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reviews: formattedReviews });
   } catch (error) {
-    console.error('API処理エラー:', error);
-    return NextResponse.json({ error: '予期せぬエラーが発生しました' }, { status: 500 });
+    console.error('Review fetch error:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `ユーザーのレビューの取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

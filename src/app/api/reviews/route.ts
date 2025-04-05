@@ -93,8 +93,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, review });
   } catch (error) {
     console.error('レビュー作成エラー:', error);
-    return NextResponse.json({ error: 'レビューの作成に失敗しました' }, { status: 500 });
-  } finally {
-    console.log('===== レビュー投稿API終了 =====');
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `レビューの作成に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
   }
 }

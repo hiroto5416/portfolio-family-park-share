@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { ParkDetail } from '@/features/park/components/ParkDetail';
 import { ParkReview } from '@/features/park/components/ParkReview';
 import { Card } from '@/components/ui/card';
@@ -53,6 +53,7 @@ export default function ParkDetailPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const isMounted = useRef(true);
 
   const fetchReviews = useCallback(async () => {
     if (!id) return;
@@ -65,6 +66,8 @@ export default function ParkDetailPage() {
         const errorText = await response.text();
         console.error('レビュー取得サーバーエラー:', response.status, errorText);
 
+        if (!isMounted.current) return;
+
         if (response.status === 404) {
           setReviews([]);
           return;
@@ -72,19 +75,24 @@ export default function ParkDetailPage() {
 
         try {
           const errorJson = JSON.parse(errorText);
-          throw new Error(errorJson.error || 'レビューの取得に失敗しました');
+          setReviewError(errorJson.error || 'レビューの取得に失敗しました');
         } catch {
-          throw new Error(`レビューの取得に失敗しました (${response.status})`);
+          setReviewError(`レビューの取得に失敗しました (${response.status})`);
         }
+        return;
       }
 
       const data = await response.json();
+      if (!isMounted.current) return;
       setReviews(data.reviews || []);
     } catch (error) {
       console.error('レビュー取得エラー:', error);
+      if (!isMounted.current) return;
       setReviewError(error instanceof Error ? error.message : '不明なエラー');
     } finally {
-      setIsLoadingReviews(false);
+      if (isMounted.current) {
+        setIsLoadingReviews(false);
+      }
     }
   }, [id]);
 
@@ -98,42 +106,47 @@ export default function ParkDetailPage() {
       }
 
       try {
+        setLoading(true);
+        setError(null);
         const response = await fetch(`/api/parks/${id}`);
 
         if (!response.ok) {
-          throw new Error(`APIエラー: ${response.status}`);
+          const errorText = await response.text();
+          console.error('公園データ取得サーバーエラー:', response.status, errorText);
+
+          if (!isMounted.current) return;
+
+          try {
+            const errorJson = JSON.parse(errorText);
+            setError(errorJson.error || '公園データの取得に失敗しました');
+          } catch {
+            setError(`公園データの取得に失敗しました (${response.status})`);
+          }
+          return;
         }
 
         const data = await response.json();
-
-        const saveResponse = await fetch('/api/parks', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            place_id: id,
-            name: data.park.name,
-            address: data.park.address || '',
-          }),
-        });
-
-        if (!saveResponse.ok) {
-          console.error('公園データの保存に失敗:', await saveResponse.text());
-        }
+        if (!isMounted.current) return;
 
         setParkData(data.park);
 
         await fetchReviews();
       } catch (error) {
-        console.error('Error:', error);
-        setError('公園情報の取得に失敗しました');
+        console.error('公園データ取得エラー:', error);
+        if (!isMounted.current) return;
+        setError(error instanceof Error ? error.message : '不明なエラー');
       } finally {
-        setLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
 
     fetchParkData();
+
+    return () => {
+      isMounted.current = false;
+    };
   }, [id, params, fetchReviews]);
 
   // ローディング状態の表示

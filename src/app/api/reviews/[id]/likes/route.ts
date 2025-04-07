@@ -12,6 +12,8 @@ type RouteContext = {
 
 // いいね状態の取得
 export async function GET(request: NextRequest, context: RouteContext) {
+  const startTime = Date.now();
+
   try {
     // Promiseからパラメータを取得
     const p = await context.params;
@@ -43,12 +45,24 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ liked: !!like });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `いいね状態の取得に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    const p = await context.params; // Promiseを解決
+    console.error('詳細なエラー情報:', {
+      executionTime: Date.now() - startTime,
+      error: {
+        message: error instanceof Error ? error.message : '不明なエラー',
+        name: error instanceof Error ? error.name : '不明',
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      request: {
+        url: request.url,
+        method: request.method,
+      },
+      context: {
+        reviewId: p.id, // 解決したPromiseから値を取得
+      },
+    });
+
+    throw error;
   }
 }
 

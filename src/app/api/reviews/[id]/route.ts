@@ -113,12 +113,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ message: 'レビューが更新されました', imageUrls }, { status: 200 });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `レビューの更新に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('レビュー更新エラー:', error);
+    return NextResponse.json({ error: 'サーバーエラーが発生しました' }, { status: 500 });
   }
 }
 
@@ -179,11 +175,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `レビューの削除に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('削除エラー:', error);
+    return NextResponse.json({ error: '予期せぬエラーが発生しました' }, { status: 500 });
   }
 }

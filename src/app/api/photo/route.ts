@@ -38,11 +38,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: ` ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('Error fetching photo:', error);
+    return NextResponse.json({ error: '写真の取得に失敗しました' }, { status: 500 });
   }
 }

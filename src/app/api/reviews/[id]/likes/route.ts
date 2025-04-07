@@ -43,12 +43,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ liked: !!like });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `いいね状態の取得に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('いいね状態確認エラー:', error);
+    return NextResponse.json({ error: '処理に失敗しました' }, { status: 500 });
   }
 }
 
@@ -125,11 +121,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ liked: true });
     }
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `いいねのトグルに失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('いいね処理エラー:', error);
+    return NextResponse.json({ error: '処理に失敗しました' }, { status: 500 });
   }
 }

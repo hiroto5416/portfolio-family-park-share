@@ -70,44 +70,38 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, park });
   } catch (error: unknown) {
-    console.error('公園データの保存エラー:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `公園データの保存に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
-    // if (error instanceof Error) {
-    //   console.error('公園データの保存エラー:', {
-    //     message: error.message,
-    //     name: error.name,
-    //     stack: error.stack,
-    //     // 環境変数の存在確認
-    //     env: {
-    //       DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-    //       DIRECT_URL_EXISTS: !!process.env.DIRECT_URL,
-    //       NODE_ENV: process.env.NODE_ENV,
-    //     },
-    //   });
+    if (error instanceof Error) {
+      console.error('公園データの保存エラー:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        // 環境変数の存在確認
+        env: {
+          DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+          DIRECT_URL_EXISTS: !!process.env.DIRECT_URL,
+          NODE_ENV: process.env.NODE_ENV,
+        },
+      });
 
-    //   // エラータイプに応じたレスポンス
-    //   if (
-    //     error.name &&
-    //     error.name.includes('Prisma') &&
-    //     (error.message.includes('connection') || error.message.includes('database'))
-    //   ) {
-    //     return NextResponse.json(
-    //       { error: 'データベースへの接続に失敗しました。しばらくしてからお試しください。' },
-    //       { status: 503 } // Service Unavailable
-    //     );
-    //   }
+      // エラータイプに応じたレスポンス
+      if (
+        error.name &&
+        error.name.includes('Prisma') &&
+        (error.message.includes('connection') || error.message.includes('database'))
+      ) {
+        return NextResponse.json(
+          { error: 'データベースへの接続に失敗しました。しばらくしてからお試しください。' },
+          { status: 503 } // Service Unavailable
+        );
+      }
 
-    //   return NextResponse.json({ error: '公園データの保存に失敗しました' }, { status: 500 });
-    // } else {
-    //   console.error('不明なエラーが発生しました:', error);
-    //   return NextResponse.json(
-    //     { error: '公園データの保存に失敗しました: 不明なエラー' },
-    //     { status: 500 }
-    //   );
-    // }
+      return NextResponse.json({ error: '公園データの保存に失敗しました' }, { status: 500 });
+    } else {
+      console.error('不明なエラーが発生しました:', error);
+      return NextResponse.json(
+        { error: '公園データの保存に失敗しました: 不明なエラー' },
+        { status: 500 }
+      );
+    }
   }
 }

@@ -51,11 +51,10 @@ export async function PUT(request: Request) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('プロフィール更新エラー:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return Response.json(
-      { error: `プロフィールの更新に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+    console.error('Profile update error:', error);
+    return new Response(JSON.stringify({ error: 'プロフィールの更新に失敗しました' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

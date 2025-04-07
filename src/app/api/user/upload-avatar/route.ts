@@ -84,10 +84,9 @@ export async function POST(request: NextRequest) {
     // 成功レスポンスを返す
     return NextResponse.json({ url: publicUrl });
   } catch (error) {
-    console.error('アバター更新エラー:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    console.error('Avatar upload error:', error);
     return NextResponse.json(
-      { error: `アバターの更新に失敗しました: ${errorMessage}` },
+      { error: 'サーバーエラーが発生しました', details: String(error) },
       { status: 500 }
     );
   }

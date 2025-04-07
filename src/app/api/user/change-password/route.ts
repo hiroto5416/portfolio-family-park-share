@@ -38,12 +38,7 @@ export async function PUT(request: Request) {
     });
 
     return NextResponse.json({ message: 'パスワードを更新しました' });
-  } catch (error) {
-    console.error('パスワード更新エラー:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
-    return NextResponse.json(
-      { error: `パスワードの更新に失敗しました: ${errorMessage}` },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: 'パスワードの更新に失敗しました' }, { status: 500 });
   }
 }

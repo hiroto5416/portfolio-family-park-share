@@ -13,10 +13,15 @@ export async function POST(request: Request) {
     const parkId = formData.get('parkId') as string;
     const imageFiles = formData.getAll('images');
 
-    console.log('受信したデータ:', { content, parkId, imageCount: imageFiles.length });
+    console.log('受信したデータ:', {
+      content: content?.substring(0, 50) + (content?.length > 50 ? '...' : ''),
+      parkId,
+      imageCount: imageFiles.length,
+    });
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
+      console.error('未認証アクセス');
       return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
     }
 
@@ -28,15 +33,14 @@ export async function POST(request: Request) {
     });
 
     if (!park) {
-      console.log('公園が見つかりません:', parkId);
+      console.error('公園が見つかりません:', parkId);
       return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
     }
 
-    // データベース内のユーザー一覧を確認
-    const allUsers = await prisma.user.findMany({
-      take: 10, // 最初の10件だけ取得
+    console.log('公園データ取得成功:', {
+      id: park.id,
+      name: park.name,
     });
-    console.log('データベースのユーザー一覧:', JSON.stringify(allUsers, null, 2));
 
     // ユーザーを検索
     let user = await prisma.user.findUnique({
@@ -62,12 +66,22 @@ export async function POST(request: Request) {
             },
           },
         });
-        console.log('ユーザー作成成功:', user);
+        console.log('ユーザー作成成功:', {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        });
       } catch (userCreateError) {
-        console.error('ユーザー作成エラー:', userCreateError);
+        console.error('ユーザー作成エラー:', {
+          error: userCreateError,
+          message: userCreateError instanceof Error ? userCreateError.message : '不明なエラー',
+          email: session.user.email,
+        });
         return NextResponse.json({ error: 'ユーザーの作成に失敗しました' }, { status: 500 });
       }
     }
+
+    console.log('レビュー作成開始');
 
     // レビューの作成
     const review = await prisma.review.create({
@@ -78,8 +92,15 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('レビュー作成成功:', {
+      id: review.id,
+      parkId: review.parkId,
+      userId: review.userId,
+    });
+
     // 画像のアップロードと保存
     if (imageFiles.length > 0) {
+      console.log('画像アップロード処理開始');
       const imageUrls = await uploadReviewImages(imageFiles as File[], review.id);
 
       await prisma.reviewImage.createMany({
@@ -88,12 +109,24 @@ export async function POST(request: Request) {
           imageUrl: url,
         })),
       });
+      console.log('画像アップロード完了:', { count: imageUrls.length });
     }
 
     return NextResponse.json({ success: true, review });
   } catch (error) {
-    console.error('レビュー作成エラー:', error);
-    return NextResponse.json({ error: 'レビューの作成に失敗しました' }, { status: 500 });
+    console.error('レビュー作成エラー:', {
+      error,
+      message: error instanceof Error ? error.message : '不明なエラー',
+      stack: error instanceof Error ? error.stack : undefined,
+      prismaError: error instanceof Error && 'code' in error ? error['code'] : undefined,
+    });
+    return NextResponse.json(
+      {
+        error: 'レビューの作成に失敗しました',
+        details: error instanceof Error ? error.message : '不明なエラー',
+      },
+      { status: 500 }
+    );
   } finally {
     console.log('===== レビュー投稿API終了 =====');
   }

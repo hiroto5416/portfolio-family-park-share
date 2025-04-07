@@ -67,6 +67,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       ],
     });
 
+    console.log(`レビュー取得完了: ${reviews.length}件`);
+
     // レスポンスの形式を元のSupabaseレスポースと合わせる
     const formattedReviews = reviews.map((review) => ({
       id: review.id,
@@ -85,10 +87,15 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     // 成功時はレビューデータを返す
     return NextResponse.json({ reviews: formattedReviews || [] });
   } catch (error) {
-    console.error('Review fetch error:', error);
-    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    console.error('Review fetch error:', {
+      error,
+      message: error instanceof Error ? error.message : '不明なエラー',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
-      { error: `レビューの取得に失敗しました: ${errorMessage}` },
+      {
+        error: `レビューの取得に失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`,
+      },
       { status: 500 }
     );
   }

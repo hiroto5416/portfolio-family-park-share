@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
+  console.log('===== ユーザーのレビュー取得API開始 =====');
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get('userId');
 
   if (!userId) {
+    console.error('バリデーションエラー: ユーザーIDが指定されていません');
     return NextResponse.json({ error: 'ユーザーIDが必要です' }, { status: 400 });
   }
 
   try {
-    console.log('ユーザーのレビューを取得:', userId);
+    console.log('ユーザーのレビュー取得開始:', { userId });
 
     // Prismaを使用してユーザーのレビューを取得
     const reviews = await prisma.review.findMany({
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log(`${reviews.length}件のレビューを取得しました`);
+    console.log(`レビュー取得成功: ${reviews.length}件のレビューを取得しました`);
 
     // 返すデータを整形（元のSupabaseのレスポンス形式に合わせる）
     const formattedReviews = reviews.map((review) => ({
@@ -60,7 +62,21 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reviews: formattedReviews });
   } catch (error) {
-    console.error('API処理エラー:', error);
-    return NextResponse.json({ error: '予期せぬエラーが発生しました' }, { status: 500 });
+    console.error('ユーザーのレビュー取得エラー:', {
+      error,
+      message: error instanceof Error ? error.message : '不明なエラー',
+      stack: error instanceof Error ? error.stack : undefined,
+      prismaError: error instanceof Error && 'code' in error ? error['code'] : undefined,
+      userId,
+    });
+    return NextResponse.json(
+      {
+        error: 'レビューの取得に失敗しました',
+        details: error instanceof Error ? error.message : '不明なエラー',
+      },
+      { status: 500 }
+    );
+  } finally {
+    console.log('===== ユーザーのレビュー取得API終了 =====');
   }
 }

@@ -12,27 +12,43 @@ type RouteContext = {
  * リトライロジックを実装
  * @param fn
  * @param maxRetries
- * @param initialDelay
+ * @param delay
  * @returns
  */
-async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, initialDelay = 1000): Promise<T> {
-  let lastError: Error | null = null;
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, delay = 500): Promise<T> {
+  let lastError: Error;
 
-  for (let i = 0; i < maxRetries; i++) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error) {
-      lastError = error as Error;
-      console.error(`試行 ${i + 1}/${maxRetries} 失敗:`, error);
-
-      if (i < maxRetries - 1) {
-        const delay = initialDelay * Math.pow(2, i);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(`接続試行 ${attempt + 1}/${maxRetries} 失敗:`, error.message);
+        lastError = error;
+      } else {
+        console.log(`接続試行 ${attempt + 1}/${maxRetries} 失敗:`, error);
+        lastError = new Error('不明なエラーが発生しました');
       }
+
+      // データベース関連のエラーのみリトライ
+      const isDbConnectionError =
+        error instanceof Error &&
+        (error.message === 'PARK_NOT_FOUND'
+          ? false
+          : error.message.includes('connection') ||
+            error.message.includes('timeout') ||
+            error.message.includes('database') ||
+            error.name.includes('Prisma'));
+
+      if (!isDbConnectionError) {
+        throw error;
+      }
+
+      await new Promise((r) => setTimeout(r, delay * Math.pow(2, attempt)));
     }
   }
 
-  throw lastError;
+  throw lastError!;
 }
 
 /**
@@ -41,22 +57,34 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3, initialDelay =
  * @param context ルートコンテキスト
  * @returns レスポンスオブジェクト
  */
-export async function GET(request: NextRequest, context: RouteContext) {
-  const startTime = Date.now();
-  const requestId = crypto.randomUUID();
-
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const p = await context.params;
-    const parkId = p.id;
+    const id = p.id;
+    console.log('Fetching reviews for park:', id);
 
-    console.log(`[${requestId}] レビュー取得開始:`, {
-      parkId,
-      timestamp: new Date().toISOString(),
-    });
+    // リトライロジックを使って公園の確認とレビュー取得を行う
+    const formattedReviews = await withRetry(async () => {
+      // 1. 公園IDの確認（place_idからidへの変換）
+      const parkResult = await prisma.park.findUnique({
+        select: {
+          id: true,
+        },
+        where: {
+          place_id: id,
+        },
+      });
 
-    const reviews = await withRetry(async () => {
-      const result = await prisma.review.findMany({
-        where: { parkId },
+      // 公園が見つからない場合はエラー
+      if (!parkResult) {
+        console.error('公園が見つかりません:', id);
+        throw new Error('PARK_NOT_FOUND');
+      }
+
+      console.log('クエリ実行開始...');
+
+      // 2. レビューの取得
+      const reviews = await prisma.review.findMany({
         select: {
           id: true,
           content: true,
@@ -74,40 +102,81 @@ export async function GET(request: NextRequest, context: RouteContext) {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        where: {
+          parkId: parkResult.id,
+        },
+        orderBy: [
+          {
+            createdAt: 'desc',
+          },
+        ],
       });
 
-      console.log(`[${requestId}] クエリ実行完了:`, {
-        reviewCount: result.length,
-        executionTime: Date.now() - startTime,
-      });
-
-      return result;
+      // レスポンスの形式を元のSupabaseレスポースと合わせる
+      return reviews.map((review) => ({
+        id: review.id,
+        content: review.content,
+        created_at: review.createdAt.toISOString(),
+        likes_count: review.likesCount,
+        users: {
+          name: review.user.name,
+          image: review.user.avatarUrl,
+        },
+        review_images: review.images.map((image) => ({
+          image_url: image.imageUrl,
+        })),
+      }));
     });
 
-    return NextResponse.json({ reviews });
-  } catch (error) {
-    console.error(`[${requestId}] 詳細なエラー情報:`, {
-      executionTime: Date.now() - startTime,
-      error: {
-        message: error instanceof Error ? error.message : '不明なエラー',
-        name: error instanceof Error ? error.name : '不明',
-        stack: error instanceof Error ? error.stack : undefined,
-      },
-      request: {
-        url: request.url,
-        method: request.method,
-        headers: Object.fromEntries(request.headers),
-      },
-      context: {
-        parkId: (await context.params).id,
-      },
-      prismaInfo: {
-        connectionUrl: process.env.DATABASE_URL ? '設定済み' : '未設定',
-        directUrl: process.env.DIRECT_URL ? '設定済み' : '未設定',
-      },
-    });
+    // 成功時はレビューデータを返す
+    return NextResponse.json({ reviews: formattedReviews || [] });
+  } catch (error: unknown) {
+    console.error('公園のレビュー取得エラー:', error);
+    const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+    return NextResponse.json(
+      { error: `公園のレビューの取得に失敗しました: ${errorMessage}` },
+      { status: 500 }
+    );
+    // if (error instanceof Error) {
+    //   console.error('Review fetch error:', {
+    //     message: error.message,
+    //     name: error.name,
+    //     stack: error.stack,
+    //     // 環境変数の存在確認
+    //     env: {
+    //       DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+    //       DIRECT_URL_EXISTS: !!process.env.DIRECT_URL,
+    //       NODE_ENV: process.env.NODE_ENV,
+    //     },
+    //   });
 
-    return NextResponse.json({ error: 'レビューの取得に失敗しました' }, { status: 500 });
+    //   // エラータイプに応じたレスポンス
+    //   if (error.message === 'PARK_NOT_FOUND') {
+    //     return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
+    //   }
+
+    //   if (
+    //     error.name &&
+    //     error.name.includes('Prisma') &&
+    //     (error.message.includes('connection') || error.message.includes('database'))
+    //   ) {
+    //     return NextResponse.json(
+    //       { error: 'データベースへの接続に失敗しました。しばらくしてからお試しください。' },
+    //       { status: 503 } // Service Unavailable
+    //     );
+    //   }
+
+    //   const errorMessage = error.message;
+    //   return NextResponse.json(
+    //     { error: `レビューの取得に失敗しました: ${errorMessage}` },
+    //     { status: 500 }
+    //   );
+    // } else {
+    //   console.error('不明なエラーが発生しました:', error);
+    //   return NextResponse.json(
+    //     { error: 'レビューの取得に失敗しました: 不明なエラー' },
+    //     { status: 500 }
+    //   );
+    // }
   }
 }

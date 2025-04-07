@@ -12,9 +12,19 @@ export async function POST(request: NextRequest) {
   try {
     console.log('API route called with POST method');
 
+    // 環境変数のチェック
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing Supabase configuration:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey,
+      });
+      return NextResponse.json({ error: 'サーバー設定が正しくありません' }, { status: 500 });
+    }
+
     // セッション情報を取得
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
+      console.error('No session found');
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
@@ -26,9 +36,15 @@ export async function POST(request: NextRequest) {
       userId,
       fileName,
       contentType: contentType?.substring(0, 30),
+      hasFileBase64: !!fileBase64,
     });
 
     if (!userId || !fileBase64 || !fileName) {
+      console.error('Missing required data:', {
+        hasUserId: !!userId,
+        hasFileBase64: !!fileBase64,
+        hasFileName: !!fileName,
+      });
       return NextResponse.json({ error: '必要なデータが不足しています' }, { status: 400 });
     }
 
@@ -53,7 +69,11 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Upload error details:', uploadError);
+      console.error('Upload error details:', {
+        error: uploadError,
+        message: uploadError.message,
+        name: uploadError.name,
+      });
       return NextResponse.json(
         { error: '画像のアップロードに失敗しました', details: uploadError },
         { status: 500 }
@@ -71,11 +91,12 @@ export async function POST(request: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
       data: {
-        avatarUrl: publicUrl, // avatar_url ではなく avatarUrl を使用
+        avatarUrl: publicUrl,
       },
     });
 
     if (!updatedUser) {
+      console.error('Failed to update user profile');
       return NextResponse.json({ error: 'プロフィール更新に失敗しました' }, { status: 500 });
     }
 
@@ -84,7 +105,11 @@ export async function POST(request: NextRequest) {
     // 成功レスポンスを返す
     return NextResponse.json({ url: publicUrl });
   } catch (error) {
-    console.error('Avatar upload error:', error);
+    console.error('Avatar upload error:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'サーバーエラーが発生しました', details: String(error) },
       { status: 500 }

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate:reviews": "ts-node --project scripts/migrations/tsconfig.json scripts/migrations/migration-update-reviews.ts"
+    "migrate:reviews": "ts-node --project scripts/migrations/tsconfig.json scripts/migrations/migration-update-reviews.ts",
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",

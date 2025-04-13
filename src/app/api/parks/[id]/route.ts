@@ -8,6 +8,12 @@ type RouteContext = {
   }>;
 };
 
+/**
+ * 公園の詳細情報を取得するAPI
+ * @param request リクエスト
+ * @param context パラメータ（公園IDを含む）
+ * @returns 公園の詳細情報
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     // Promiseからパラメータを取得
@@ -15,7 +21,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const placeId = p.id;
 
     // デバッグ用にパラメータを確認
-    console.log('Received request for park ID:', placeId);
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -25,18 +30,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${apiKey}&language=ja`;
-    console.log('Fetching from URL:', url);
 
     const response = await fetch(url);
     const data = await response.json();
-
-    console.log('Google Places API response:', data);
 
     if (!data.result) {
       return NextResponse.json({ error: '公園が見つかりませんでした' }, { status: 404 });
     }
 
-    console.log('Business status from API:', data.result.business_status);
     return NextResponse.json({
       park: {
         id: data.result.place_id,

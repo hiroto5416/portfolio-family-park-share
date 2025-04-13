@@ -5,6 +5,11 @@ import type { NextRequest } from 'next/server';
 // 保護が必要なルート
 const protectedRoutes = ['/mypage'];
 
+/**
+ * ミドルウェア
+ * @param request リクエスト
+ * @returns レスポンス
+ */
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 

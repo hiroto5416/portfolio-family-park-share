@@ -8,6 +8,10 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 
+/**
+ * ログインページ
+ * @returns ログインページ
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({

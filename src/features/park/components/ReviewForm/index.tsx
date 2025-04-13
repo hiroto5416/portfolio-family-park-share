@@ -6,12 +6,21 @@ import { Upload } from 'lucide-react';
 import React, { useState } from 'react';
 import Image from 'next/image';
 
+/**
+ * レビューフォームのプロップス
+ */
 interface ReviewFormProps {
   parkName: string;
   onSubmit: (data: { content: string; images: File[] }) => void;
   onCancel: () => void;
 }
 
+/**
+ * レビューフォーム
+ * @param parkName 公園名
+ * @param onSubmit レビューを送信する
+ * @param onCancel レビューをキャンセルする
+ */
 export function ReviewForm({ parkName, onSubmit, onCancel }: ReviewFormProps) {
   const [content, setContent] = useState('');
   const [images, setImages] = useState<File[]>([]);

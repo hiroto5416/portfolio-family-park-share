@@ -9,6 +9,10 @@ import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 
+/**
+ * ヘッダー
+ * @returns ヘッダー
+ */
 export function Header() {
   const isVisible = useScrollDirection();
   const pathname = usePathname();

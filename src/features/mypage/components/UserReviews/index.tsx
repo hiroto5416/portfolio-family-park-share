@@ -1,21 +1,30 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ThumbsUp, Pencil, Trash2, MoreVertical } from 'lucide-react';
-import { useState } from 'react';
-import { ReviewListProps } from '@/types/review';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ThumbsUp, Pencil, Trash2, MoreVertical } from 'lucide-react';
+import { useState } from 'react';
+import { ReviewListProps } from '@/types/review';
 import { ReviewEditModal as ImportedReviewEditModal } from '../ReviewEditModal';
 import { DeleteConfirmModal } from '../DeleteConfirmModal';
 
+/**
+ * レビューのページ数
+ */
 const REVIEWS_PER_PAGE = 5;
 
+/**
+ * ユーザーのレビュー
+ * @param reviews レビューリスト
+ * @param isLoading ローディング状態
+ * @param onReviewUpdated レビュー更新時のコールバック
+ */
 export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: ReviewListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedReview, setSelectedReview] = useState<null | (typeof reviews)[0]>(null);
@@ -81,13 +90,11 @@ export function UserReviews({ reviews, isLoading = false, onReviewUpdated }: Rev
 
   // 編集処理を修正
   const handleEdit = (reviewId: string) => {
-    console.log('編集ボタンがクリックされました: ', reviewId);
     const review = reviews.find((r) => r.id === reviewId);
 
     if (review) {
       setSelectedReview(review);
       setIsEditModalOpen(true);
-      console.log('モーダルを開く状態に設定しました');
     } else {
       console.error('レビューが見つかりませんでした');
     }

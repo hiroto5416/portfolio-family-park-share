@@ -9,6 +9,9 @@ import { LocationWarning } from '@/components/LocationWarning';
 // Google Maps の「places」ライブラリを使用することを宣言
 const libraries: Libraries = ['places'];
 
+/**
+ * 公園データ
+ */
 interface Park {
   name: string;
   location: {
@@ -17,6 +20,10 @@ interface Park {
   };
 }
 
+/**
+ * GoogleMapコンポーネント
+ * @returns GoogleMapコンポーネント
+ */
 export function GoogleMapComponent() {
   const [parks, setParks] = useState<Park[]>([]);
   const { location, error, isDefaultLocation } = useGeolocation();

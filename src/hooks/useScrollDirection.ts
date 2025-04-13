@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+/**
+ * スクロール方向を取得する
+ * @returns スクロール方向
+ */
 export function useScrollDirection() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);

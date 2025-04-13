@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * 位置情報の状態
+ */
 interface GeolocationState {
   location: {
     lat: number;
@@ -15,6 +18,10 @@ const DEFAULT_LOCATION = {
   lng: 139.7671248,
 };
 
+/**
+ * 位置情報を取得する
+ * @returns 位置情報の状態
+ */
 export const useGeolocation = () => {
   const [state, setState] = useState<GeolocationState>({
     location: null,

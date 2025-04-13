@@ -18,7 +18,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const p = await context.params;
     const id = p.id;
-    console.log('Fetching reviews for park:', id);
 
     // 1. 公園IDの確認（place_idからidへの変換）
     const parkResult = await prisma.park.findUnique({
@@ -36,7 +35,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
     }
 
-    console.log('クエリ実行開始...');
 
     // 2. レビューの取得
     const reviews = await prisma.review.findMany({
@@ -67,7 +65,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       ],
     });
 
-    console.log(`レビュー取得完了: ${reviews.length}件`);
 
     // レスポンスの形式を元のSupabaseレスポースと合わせる
     const formattedReviews = reviews.map((review) => ({

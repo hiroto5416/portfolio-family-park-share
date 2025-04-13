@@ -1,5 +1,11 @@
 import { supabase } from './supabase';
 
+/**
+ * レビュー画像をアップロードする
+ * @param files アップロードするファイル
+ * @param reviewId レビューID
+ * @returns アップロードされた画像のURL
+ */
 export async function uploadReviewImages(files: File[], reviewId: string): Promise<string[]> {
   const uploadPromises = files.map(async (file) => {
     const fileExt = file.name.split('.').pop();

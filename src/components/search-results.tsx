@@ -6,12 +6,21 @@ import { Card } from './ui/card';
 import { MapPin, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
 
+/**
+ * 検索結果のプロップス
+ */
 interface SearchResultsProps {
   parks: Park[];
   isLoading: boolean;
   error: string | null;
 }
 
+/**
+ * 検索結果
+ * @param parks 公園リスト
+ * @param isLoading ローディング状態
+ * @param error エラー
+ */
 export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
   if (isLoading) {
     return (

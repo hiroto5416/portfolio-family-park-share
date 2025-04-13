@@ -1,3 +1,8 @@
+
+/**
+ * 利用規約ページ
+ * @returns 利用規約ページ
+ */
 export default function TermsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">

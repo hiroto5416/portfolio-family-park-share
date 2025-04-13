@@ -6,6 +6,9 @@ import { ThumbsUp } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 
+/**
+ * 公園レビューのプロップス
+ */
 interface ParkReviewProps {
   id: string;
   name: string;
@@ -16,6 +19,14 @@ interface ParkReviewProps {
   image?: string;
 }
 
+/**
+ * 公園レビュー
+ * @param id レビューID
+ * @param name レビュー者名
+ * @param content レビュー内容
+ * @param date レビュー日時
+ * @param images レビュー画像
+ */
 export function ParkReview({
   id,
   name,

@@ -3,8 +3,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+/**
+ * Supabaseクライアント
+ */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+/**
+ * プロフィール更新
+ * @param request リクエスト
+ * @returns レスポンス
+ */
 export async function PUT(request: Request) {
   try {
     const { name, avatarUrl } = await request.json();

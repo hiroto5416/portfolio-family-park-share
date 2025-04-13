@@ -10,6 +10,9 @@ import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { uploadAvatar } from '@/lib/uploadAvatar';
 
+/**
+ * アカウントタブのプロップス
+ */
 interface AccountTabProps {
   initialData: {
     name: string;
@@ -19,7 +22,9 @@ interface AccountTabProps {
   };
 }
 
-// レビューの型定義
+/**
+ * レビュー
+ */
 interface Review {
   id: string;
   content: string;
@@ -36,6 +41,11 @@ interface Review {
   }[];
 }
 
+/**
+ * アカウントタブ
+ * @param initialData 初期データ
+ * @returns アカウントタブ
+ */
 export function AccountTab({ initialData }: AccountTabProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -236,6 +246,7 @@ export function AccountTab({ initialData }: AccountTabProps) {
           <div className="space-y-2">
             <label className="text-sm font-medium">プロフィール画像</label>
             <div className="flex items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               {avatarPreview ? (
                 <img
                   src={avatarPreview}

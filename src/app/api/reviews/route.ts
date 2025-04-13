@@ -5,19 +5,17 @@ import { authOptions } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import { uploadReviewImages } from '@/lib/uploadImage';
 
+/**
+ * レビュー投稿API
+ * @param request リクエスト
+ * @returns レビュー投稿結果
+ */
 export async function POST(request: Request) {
-  console.log('===== レビュー投稿API開始 =====');
   try {
     const formData = await request.formData();
     const content = formData.get('content') as string;
     const parkId = formData.get('parkId') as string;
     const imageFiles = formData.getAll('images');
-
-    console.log('受信したデータ:', {
-      content: content?.substring(0, 50) + (content?.length > 50 ? '...' : ''),
-      parkId,
-      imageCount: imageFiles.length,
-    });
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -37,11 +35,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: '公園が見つかりません' }, { status: 404 });
     }
 
-    console.log('公園データ取得成功:', {
-      id: park.id,
-      name: park.name,
-    });
-
     // ユーザーを検索
     let user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -49,7 +42,6 @@ export async function POST(request: Request) {
 
     // ユーザーが存在しない場合は作成
     if (!user) {
-      console.log('ユーザーが存在しないため作成します:', session.user.email);
       try {
         // パスワードはダミー値を設定（実際の認証はNextAuthで行われるため）
         const hashedPassword = await bcrypt.hash('dummyPassword', 10);
@@ -66,11 +58,6 @@ export async function POST(request: Request) {
             },
           },
         });
-        console.log('ユーザー作成成功:', {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        });
       } catch (userCreateError) {
         console.error('ユーザー作成エラー:', {
           error: userCreateError,
@@ -81,8 +68,6 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log('レビュー作成開始');
-
     // レビューの作成
     const review = await prisma.review.create({
       data: {
@@ -92,15 +77,8 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log('レビュー作成成功:', {
-      id: review.id,
-      parkId: review.parkId,
-      userId: review.userId,
-    });
-
     // 画像のアップロードと保存
     if (imageFiles.length > 0) {
-      console.log('画像アップロード処理開始');
       const imageUrls = await uploadReviewImages(imageFiles as File[], review.id);
 
       await prisma.reviewImage.createMany({
@@ -109,7 +87,6 @@ export async function POST(request: Request) {
           imageUrl: url,
         })),
       });
-      console.log('画像アップロード完了:', { count: imageUrls.length });
     }
 
     return NextResponse.json({ success: true, review });
@@ -127,7 +104,5 @@ export async function POST(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    console.log('===== レビュー投稿API終了 =====');
   }
 }

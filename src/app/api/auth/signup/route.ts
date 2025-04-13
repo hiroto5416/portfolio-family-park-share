@@ -2,6 +2,11 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
+/**
+ * サインアップ
+ * @param request
+ * @returns
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json();

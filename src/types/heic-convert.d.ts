@@ -1,3 +1,6 @@
+/**
+ * heic-convertの型定義
+ */
 declare module 'heic-convert' {
   interface ConvertOptions {
     buffer: Buffer;
@@ -5,6 +8,11 @@ declare module 'heic-convert' {
     quality?: number;
   }
 
+  /**
+   * heic-convertの関数
+   * @param options オプション
+   * @returns バッファ
+   */
   function convert(options: ConvertOptions): Promise<Buffer>;
   export default convert;
 }

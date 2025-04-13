@@ -17,6 +17,10 @@ const googlePlacesLoader = ({ src, width }: { src: string; width: number }) => {
   return `/api/photo?reference=${reference}&width=${width}`;
 };
 
+/**
+ * 公園リスト
+ * @returns 公園リスト
+ */
 export function ParkList() {
   const [parks, setParks] = useState<Park[]>([]);
   const [loading, setLoading] = useState(true);

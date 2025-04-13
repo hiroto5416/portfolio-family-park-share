@@ -1,6 +1,9 @@
 // src/types/supabase.ts
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
+/**
+ * 認証ユーザー
+ */
 export type AuthUser = {
   id: string;
   email?: string;
@@ -8,6 +11,9 @@ export type AuthUser = {
   avatarUrl?: string; // avatar_url -> avatarUrl に変更
 };
 
+/**
+ * データベース
+ */
 export interface Database {
   public: {
     Tables: {

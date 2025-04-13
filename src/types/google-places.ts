@@ -1,3 +1,7 @@
+
+/**
+ * Google Places APIのレスポンス
+ */
 export interface GooglePlace {
   place_id: string;
   name: string;

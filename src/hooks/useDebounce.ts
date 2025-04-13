@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { SearchResult, SearchParams } from '../types/park';
 import { parkSearchService } from '../services/parkSearchService';
 
+/**
+ * デバウンス
+ * @param value 値
+ * @param delay 遅延
+ * @returns デバウンス後の値
+ */
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 

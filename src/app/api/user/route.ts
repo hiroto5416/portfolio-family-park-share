@@ -3,8 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
+/**
+ * ユーザー情報取得API
+ * @returns ユーザー情報
+ */
 export async function GET() {
-  console.log('===== ユーザー情報取得API開始 =====');
   try {
     // セッション情報を取得
     const session = await getServerSession(authOptions);
@@ -12,8 +15,6 @@ export async function GET() {
       console.error('認証エラー: セッションが存在しないか、メールアドレスが見つかりません');
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
-
-    console.log('セッション検証成功:', { userEmail: session.user.email });
 
     // Prismaを使用してユーザー情報を取得
     const user = await prisma.user.findUnique({
@@ -33,7 +34,6 @@ export async function GET() {
       return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
     }
 
-    console.log('ユーザー情報取得成功:', { userId: user.id });
     return NextResponse.json(user);
   } catch (error) {
     console.error('ユーザー情報取得エラー:', {
@@ -49,7 +49,5 @@ export async function GET() {
       },
       { status: 500 }
     );
-  } finally {
-    console.log('===== ユーザー情報取得API終了 =====');
   }
 }

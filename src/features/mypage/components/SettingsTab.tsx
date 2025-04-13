@@ -3,15 +3,20 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Lock } from 'lucide-react';
 import React, { useState } from 'react';
-// import { MapPin } from 'lucide-react';
-// import { Switch } from '@/components/ui/switch';
 
+/**
+ * パスワードフォーム
+ */
 interface PasswordForm {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
+/**
+ * 設定タブ
+ * @returns 設定タブ
+ */
 export const SettingsTab = () => {
   // const [locationEnabled, setLocationEnabled] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -167,20 +172,6 @@ export const SettingsTab = () => {
           </form>
         )}
       </Card>
-
-      {/* <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <MapPin className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-xl font-semibold text-primary">位置情報の選択</h2>
-          </div>
-          <Switch checked={locationEnabled} onCheckedChange={setLocationEnabled} />
-        </div>
-        <p className="text-sm text-muted-foreground ml-9">
-          位置情報を利用すると、近くの公園を簡単に見つけることができます。
-          この設定はいつでも変更できます。
-        </p>
-      </Card> */}
     </div>
   );
 };

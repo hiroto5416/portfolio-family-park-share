@@ -5,22 +5,26 @@ import { prisma } from '@/lib/prisma';
 import { uploadReviewImages } from '@/lib/uploadImage';
 import { createClient } from '@supabase/supabase-js';
 
-// RouteContext型の定義
+/**
+ * ルートコンテキスト型
+ */
 type RouteContext = {
   params: Promise<{
     id: string;
   }>;
 };
 
-// レビュー更新
+/**
+ * レビュー更新
+ * @param request リクエスト
+ * @param context パラメータ（レビューIDを含む）
+ * @returns レビュー更新結果
+ */
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    console.log('レビュー更新API開始');
-
     // Promiseからパラメータを取得
     const p = await context.params;
     const reviewId = p.id;
-    console.log('レビューID:', reviewId);
 
     // NextAuthでのセッション確認
     const session = await getServerSession(authOptions);
@@ -42,7 +46,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     // フォームデータをパース
     const formData = await request.formData();
     const content = formData.get('content') as string;
-    console.log('更新内容:', { content });
 
     // レビューの取得と所有者確認
     const review = await prisma.review.findUnique({
@@ -71,11 +74,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       }
     }
 
-    console.log('削除対象画像:', deletedImageUrls);
-
     // 画像を削除
     if (deletedImageUrls.length > 0) {
-      console.log('画像削除処理開始');
       // Prismaを使用して画像エントリを削除
       await prisma.reviewImage.deleteMany({
         where: {
@@ -95,17 +95,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         const path = url.split('/').slice(-2).join('/');
         await supabase.storage.from('review-images').remove([path]);
       }
-      console.log('画像削除完了');
     }
 
     // 新しい画像のアップロード
     const imageFiles = formData.getAll('images') as File[];
-    console.log('新規アップロード画像数:', imageFiles.length);
 
     let imageUrls: string[] = [];
 
     if (imageFiles.length > 0) {
-      console.log('画像アップロード処理開始');
       // 画像をアップロードして公開URLを取得
       imageUrls = await uploadReviewImages(imageFiles, reviewId);
 
@@ -118,7 +115,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           },
         });
       }
-      console.log('画像アップロード完了:', imageUrls);
     }
 
     // レビュー内容を更新
@@ -126,8 +122,6 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       where: { id: reviewId },
       data: { content },
     });
-
-    console.log('レビュー更新完了');
 
     return NextResponse.json({ message: 'レビューが更新されました', imageUrls }, { status: 200 });
   } catch (error) {
@@ -150,12 +144,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // レビュー削除
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    console.log('レビュー削除API開始');
-
     // Promiseからパラメータを取得
     const p = await context.params;
     const reviewId = p.id;
-    console.log('レビューID:', reviewId);
 
     if (!reviewId) {
       console.error('レビューIDが指定されていません');
@@ -195,8 +186,6 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: '権限がありません' }, { status: 403 });
     }
 
-    console.log('関連データ削除開始');
-
     // 関連画像の削除
     await prisma.reviewImage.deleteMany({
       where: { reviewId },
@@ -211,8 +200,6 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     await prisma.review.delete({
       where: { id: reviewId },
     });
-
-    console.log('レビュー削除完了');
 
     return NextResponse.json({ success: true });
   } catch (error) {

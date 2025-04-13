@@ -1,9 +1,16 @@
 import { Park, SearchResult, SearchParams, GooglePlace } from '../types/park';
 
+/**
+ * 公園検索サービス
+ */
 export class ParkSearchService {
   private baseUrl = '/api/search';
 
-  // テキスト検索
+  /**
+   * テキスト検索
+   * @param params 検索パラメータ
+   * @returns 検索結果
+   */
   async searchByText(params: SearchParams): Promise<SearchResult> {
     try {
       const queryParams = new URLSearchParams({
@@ -45,7 +52,12 @@ export class ParkSearchService {
     }
   }
 
-  // 位置情報による検索
+  /**
+   * 位置情報による検索
+   * @param lat 緯度
+   * @param lng 経度
+   * @returns 検索結果
+   */
   async searchByLocation(lat: number, lng: number): Promise<SearchResult> {
     try {
       const queryParams = new URLSearchParams({
@@ -73,7 +85,11 @@ export class ParkSearchService {
     }
   }
 
-  // Google Places APIのレスポンスをPark型に変換
+  /**
+   * Google Places APIのレスポンスをPark型に変換
+   * @param place Google Places APIのレスポンス
+   * @returns Park型
+   */
   private transformPlaceToPark(place: GooglePlace): Park {
     return {
       place_id: place.place_id,
@@ -97,5 +113,7 @@ export class ParkSearchService {
   }
 }
 
-// シングルトンインスタンスのエクスポート
+/**
+ * 公園検索サービスのインスタンス
+ */
 export const parkSearchService = new ParkSearchService();

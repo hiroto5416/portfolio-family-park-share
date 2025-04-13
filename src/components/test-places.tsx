@@ -21,6 +21,10 @@ interface ParkApiResponse {
   };
 }
 
+/**
+ * テスト公園
+ * @returns テスト公園
+ */
 export const TestPlaces = () => {
   const [parks, setParks] = useState<ParkApiResponse[]>([]);
   const [error, setError] = useState<string | null>(null);

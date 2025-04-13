@@ -12,6 +12,9 @@ import { useSession } from 'next-auth/react';
 
 const REVIEWS_PER_PAGE = 5;
 
+/**
+ * 公園データ
+ */
 interface ParkData {
   name: string;
   images: string[];

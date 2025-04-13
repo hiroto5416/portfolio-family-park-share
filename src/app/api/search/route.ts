@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { GooglePlace } from '@/types/park';
 
+/**
+ * 公園検索API
+ * @param request リクエスト
+ * @returns 公園検索結果
+ */
 export async function GET(request: Request) {
   try {
-    console.log('公園検索API開始');
-
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query');
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    console.log('検索パラメータ:', { query });
 
     if (!query) {
       console.error('検索クエリが指定されていません');
@@ -25,7 +26,6 @@ export async function GET(request: Request) {
       query
     )}&type=park&key=${apiKey}&language=ja`;
 
-    console.log('Google Places API リクエスト開始');
     const response = await fetch(url);
     const data = await response.json();
 
@@ -60,8 +60,6 @@ export async function GET(request: Request) {
           width: photo.width,
         })),
       }));
-
-    console.log(`検索結果: ${parks.length}件の公園が見つかりました`);
 
     return NextResponse.json({ results: parks });
   } catch (error) {

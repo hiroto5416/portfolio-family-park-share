@@ -1,11 +1,12 @@
 'use client';
 
-// import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Clock, MapPin, Store } from 'lucide-react';
-// import Image from 'next/image';
 import React from 'react';
 
+/**
+ * 公園詳細のプロップス
+ */
 interface PardDetailProps {
   name: string;
   address: string;
@@ -15,6 +16,14 @@ interface PardDetailProps {
   businessStatus: string;
 }
 
+/**
+ * 公園詳細
+ * @param name 公園名
+ * @param address 住所
+ * @param hours 営業時間
+ * @param facilities 施設
+ * @param images 画像
+ */
 export const ParkDetail: React.FC<PardDetailProps> = ({
   address,
   businessStatus,

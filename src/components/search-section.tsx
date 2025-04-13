@@ -16,6 +16,10 @@ const googlePlacesLoader = ({ src, width }: { src: string; width: number }) => {
   return `/api/photo?reference=${reference}&width=${width}`;
 };
 
+/**
+ * 検索セクション
+ * @returns 検索セクション
+ */
 export function SearchSection() {
   const { results, isLoading, error } = useSearchContext();
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});

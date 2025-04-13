@@ -5,6 +5,9 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import heic2any from 'heic-convert';
 
+/**
+ * レビュー作成モーダーのプロップス
+ */
 interface ReviewCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +16,11 @@ interface ReviewCreateModalProps {
   onSubmit: (content: string, images: File[], formData: FormData) => Promise<void>;
 }
 
+/**
+ * HEIC画像をJPEGに変換
+ * @param file 画像ファイル
+ * @returns 変換後の画像ファイル
+ */
 const convertHeicToJpeg = async (file: File): Promise<File> => {
   if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
     try {
@@ -34,6 +42,14 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
   return file;
 };
 
+/**
+ * レビュー作成モーダー
+ * @param isOpen モーダーが開いているかどうか
+ * @param onClose モーダーを閉じる
+ * @param parkName 公園名
+ * @param parkId 公園ID
+ * @param onSubmit レビューを送信する
+ */
 export function ReviewCreateModal({
   isOpen,
   onClose,

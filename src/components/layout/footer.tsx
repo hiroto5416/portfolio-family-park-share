@@ -2,6 +2,10 @@ import Link from 'next/link';
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
+/**
+ * フッター
+ * @returns フッター
+ */
 export function Footer() {
   return (
     <footer className="bg-background-secondary mt-auto">

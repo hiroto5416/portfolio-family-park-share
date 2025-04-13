@@ -5,6 +5,9 @@ import { Footer } from '@/components/layout/footer';
 import { AuthProvider } from '@/providers/auth-provider';
 import { SearchProvider } from '@/contexts/SearchContext';
 
+/**
+ * メタデータ
+ */
 export const metadata: Metadata = {
   title: 'FAMILY PARK SHARE',
   description: '家族で楽しめる公園を見つけよう',
@@ -18,6 +21,11 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * ルートレイアウト
+ * @param children 子要素
+ * @returns ルートレイアウト
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

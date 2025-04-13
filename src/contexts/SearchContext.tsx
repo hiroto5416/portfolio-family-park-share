@@ -4,7 +4,9 @@ import { createContext, useContext } from 'react';
 import { useSearch } from '@/hooks/useSearch';
 import { Park, SearchParams } from '@/types/park';
 
-// コンテキストの型定義
+/**
+ * 検索コンテキストの型
+ */
 interface SearchContextType {
   query: string;
   isLoading: boolean;
@@ -20,14 +22,21 @@ interface SearchContextType {
 // コンテキストの作成
 const SearchContext = createContext<SearchContextType | null>(null);
 
-// プロバイダーコンポーネント
+/**
+ * 検索プロバイダー
+ * @param children 子要素
+ * @returns 検索プロバイダー
+ */
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const searchState = useSearch();
 
   return <SearchContext.Provider value={searchState}>{children}</SearchContext.Provider>;
 }
 
-// カスタムフック
+/**
+ * 検索コンテキストを使用するカスタムフック
+ * @returns 検索コンテキスト
+ */
 export function useSearchContext() {
   const context = useContext(SearchContext);
   if (!context) {

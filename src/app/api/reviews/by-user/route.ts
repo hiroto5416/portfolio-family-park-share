@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * ユーザーのレビュー取得API
+ * @param request リクエスト
+ * @returns ユーザーのレビュー
+ */
 export async function GET(request: NextRequest) {
-  console.log('===== ユーザーのレビュー取得API開始 =====');
   const searchParams = request.nextUrl.searchParams;
   const userId = searchParams.get('userId');
 
@@ -12,8 +16,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log('ユーザーのレビュー取得開始:', { userId });
-
     // Prismaを使用してユーザーのレビューを取得
     const reviews = await prisma.review.findMany({
       select: {
@@ -41,8 +43,6 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc',
       },
     });
-
-    console.log(`レビュー取得成功: ${reviews.length}件のレビューを取得しました`);
 
     // 返すデータを整形（元のSupabaseのレスポンス形式に合わせる）
     const formattedReviews = reviews.map((review) => ({
@@ -77,6 +77,5 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   } finally {
-    console.log('===== ユーザーのレビュー取得API終了 =====');
   }
 }

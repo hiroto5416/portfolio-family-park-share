@@ -3,8 +3,11 @@ import { GoogleMapComponent } from '@/components/map/GoogleMap';
 import { ParkList } from '@/components/park-list';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-// import { ParkList } from '@/components/park-list';
 
+/**
+ * ホームページ
+ * @returns ホームページ
+ */
 export default function Home() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">

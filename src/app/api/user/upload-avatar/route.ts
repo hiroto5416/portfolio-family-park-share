@@ -1,4 +1,3 @@
-// app/api/user/upload-avatar/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { prisma } from '@/lib/prisma';
@@ -8,10 +7,13 @@ import { authOptions } from '@/lib/auth';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+/**
+ * アバターのアップロードAPI
+ * @param request リクエスト
+ * @returns アバターのアップロード結果
+ */
 export async function POST(request: NextRequest) {
   try {
-    console.log('API route called with POST method');
-
     // 環境変数のチェック
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('Missing Supabase configuration:', {
@@ -32,13 +34,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, fileBase64, fileName, contentType } = body;
 
-    console.log('Request data received:', {
-      userId,
-      fileName,
-      contentType: contentType?.substring(0, 30),
-      hasFileBase64: !!fileBase64,
-    });
-
     if (!userId || !fileBase64 || !fileName) {
       console.error('Missing required data:', {
         hasUserId: !!userId,
@@ -54,8 +49,6 @@ export async function POST(request: NextRequest) {
     // ファイル名の生成
     const fileExt = fileName.split('.').pop();
     const filePath = `${userId}.${fileExt}`;
-
-    console.log('Uploading file to Supabase:', { filePath });
 
     // Service Roleキーを使用してSupabaseクライアントを初期化
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -85,8 +78,6 @@ export async function POST(request: NextRequest) {
       data: { publicUrl },
     } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
-    console.log('Upload successful, got URL:', publicUrl);
-
     // Prismaを使用してユーザー情報を更新
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
@@ -99,8 +90,6 @@ export async function POST(request: NextRequest) {
       console.error('Failed to update user profile');
       return NextResponse.json({ error: 'プロフィール更新に失敗しました' }, { status: 500 });
     }
-
-    console.log('User profile updated successfully with avatar_url');
 
     // 成功レスポンスを返す
     return NextResponse.json({ url: publicUrl });

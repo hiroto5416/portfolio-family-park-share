@@ -4,6 +4,9 @@ import { useState, useCallback } from 'react';
 import { parkSearchService } from '../services/parkSearchService';
 import { Park, SearchParams } from '../types/park';
 
+/**
+ * 検索状態
+ */
 interface SearchState {
   query: string; // 検索クエリ
   isLoading: boolean; // 検索中状態
@@ -12,6 +15,10 @@ interface SearchState {
   total: number;
 }
 
+/**
+ * 検索フック
+ * @returns 検索フック
+ */
 export function useSearch() {
   const [state, setState] = useState<SearchState>({
     query: '',

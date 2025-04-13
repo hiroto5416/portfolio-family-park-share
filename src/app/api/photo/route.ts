@@ -1,17 +1,15 @@
-// /app/api/photo/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * 写真取得API
+ * @param request リクエスト
+ * @returns 写真
+ */
 export async function GET(request: NextRequest) {
-  console.log('===== 写真取得API開始 =====');
   try {
     const { searchParams } = new URL(request.url);
     const reference = searchParams.get('reference');
     const width = searchParams.get('width');
-
-    console.log('写真取得リクエスト受信:', {
-      reference,
-      requestedWidth: width,
-    });
 
     if (!reference) {
       console.error('バリデーションエラー: 写真参照IDが指定されていません');
@@ -27,11 +25,6 @@ export async function GET(request: NextRequest) {
 
     const maxWidth = width ? Math.min(Number(width), 1600) : 400;
     const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photoreference=${reference}&key=${apiKey}`;
-
-    console.log('Google Places Photo API リクエスト開始:', {
-      reference: reference.substring(0, 10) + '...',
-      maxWidth,
-    });
 
     const response = await fetch(photoUrl);
 
@@ -54,12 +47,6 @@ export async function GET(request: NextRequest) {
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('Content-Type') || 'image/jpeg';
 
-    console.log('写真取得成功:', {
-      contentType,
-      sizeKB: Math.round(imageBuffer.byteLength / 1024),
-      reference: reference.substring(0, 10) + '...',
-    });
-
     return new NextResponse(imageBuffer, {
       headers: {
         'Content-Type': contentType,
@@ -80,7 +67,5 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 }
     );
-  } finally {
-    console.log('===== 写真取得API終了 =====');
   }
 }

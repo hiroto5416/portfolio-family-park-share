@@ -14,6 +14,9 @@ declare module 'next-auth' {
   }
 }
 
+/**
+ * 認証オプション
+ */
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [

@@ -4,7 +4,10 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { Database } from '@/types/supabase';
 
-// ユーザーのレビュー取得関数（二段階検索）
+/**
+ * ユーザーのレビュー取得関数（二段階検索）
+ * @returns ユーザーのレビュー
+ */
 export async function getUserReviews() {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
@@ -61,7 +64,12 @@ export async function getUserReviews() {
   return reviews || [];
 }
 
-// レビュー更新関数（二段階検索を使用）
+/**
+ * レビュー更新関数（二段階検索を使用）
+ * @param reviewId レビューID
+ * @param content レビュー内容
+ * @returns レビュー
+ */
 export async function updateReview(reviewId: string, content: string) {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
@@ -128,7 +136,11 @@ export async function updateReview(reviewId: string, content: string) {
   return data;
 }
 
-// レビュー削除関数（二段階検索を使用）
+/**
+ * レビュー削除関数（二段階検索を使用）
+ * @param reviewId レビューID
+ * @returns レビュー
+ */
 export async function deleteReview(reviewId: string) {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
@@ -196,7 +208,13 @@ export async function deleteReview(reviewId: string) {
   return true;
 }
 
-// 新しいレビュー作成関数（二段階検索を使用）
+/**
+ * レビュー作成関数（二段階検索を使用）
+ * @param parkId 公園ID
+ * @param content レビュー内容
+ * @param imageUrls 画像URL
+ * @returns レビュー
+ */
 export async function createReview(parkId: string, content: string, imageUrls?: string[]) {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(

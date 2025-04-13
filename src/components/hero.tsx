@@ -1,6 +1,10 @@
 import React from 'react';
 import { SearchSection } from './search-section';
 
+/**
+ * ヒーローセクション
+ * @returns ヒーローセクション
+ */
 export function Hero() {
   return (
     <section className="bg-background-secondary py-12">

@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * 公園データを保存するAPI
+ * @param request リクエスト
+ * @returns 公園データ
+ */
 export async function POST(request: Request) {
   try {
-    console.log('公園データ保存API開始');
-
     // リクエストボディを取得
     const body = await request.json();
-    console.log('受信したデータ:', {
-      place_id: body.place_id,
-      name: body.name,
-      address: body.address,
-    });
 
     // 公園データを保存
     const park = await prisma.park.upsert({
@@ -25,12 +23,6 @@ export async function POST(request: Request) {
         name: body.name,
         address: body.address,
       },
-    });
-
-    console.log('公園データ保存成功:', {
-      id: park.id,
-      place_id: park.place_id,
-      name: park.name,
     });
 
     return NextResponse.json({ success: true, park });

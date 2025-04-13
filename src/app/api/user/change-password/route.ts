@@ -3,8 +3,12 @@ import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 
+/**
+ * パスワード変更API
+ * @param request リクエスト
+ * @returns パスワード変更結果
+ */
 export async function PUT(request: Request) {
-  console.log('===== パスワード変更API開始 =====');
   try {
     const session = await getServerSession();
     if (!session?.user?.email) {
@@ -14,8 +18,6 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
     const { currentPassword, newPassword } = body;
-
-    console.log('パスワード変更リクエスト受信:', { userEmail: session.user.email });
 
     // 現在のユーザー情報を取得
     const user = await prisma.user.findUnique({
@@ -45,7 +47,6 @@ export async function PUT(request: Request) {
       data: { password: hashedPassword },
     });
 
-    console.log('パスワード更新成功:', { userEmail: session.user.email });
     return NextResponse.json({ message: 'パスワードを更新しました' });
   } catch (error) {
     console.error('パスワード変更エラー:', {
@@ -62,6 +63,5 @@ export async function PUT(request: Request) {
       { status: 500 }
     );
   } finally {
-    console.log('===== パスワード変更API終了 =====');
   }
 }

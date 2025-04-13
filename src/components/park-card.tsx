@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent } from './ui/card';
 import Image from 'next/image';
 
+/**
+ * 公園カードのプロップス
+ */
 interface ParkCardProps {
   name: string;
   address: string;
@@ -15,6 +18,12 @@ interface ParkCardProps {
   photoReference?: string;
 }
 
+/**
+ * 公園カード
+ * @param name 公園名
+ * @param address 公園住所
+ * @returns 公園カード
+ */
 export const ParkCard = ({ name, address }: ParkCardProps) => {
   return (
     <Card>

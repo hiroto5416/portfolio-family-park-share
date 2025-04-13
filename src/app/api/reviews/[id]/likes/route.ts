@@ -3,27 +3,44 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
-// RouteContext型の定義
+/**
+ * ルートコンテキスト型
+ */
 type RouteContext = {
   params: Promise<{
     id: string;
   }>;
 };
 
-// いいね状態の取得
+/**
+ * いいね状態確認API
+ * @param request リクエスト
+ * @param context パラメータ（レビューIDを含む）
+ * @returns いいね状態
+ */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    console.log('いいね状態確認API開始');
-
     // Promiseからパラメータを取得
     const p = await context.params;
     const reviewId = p.id;
     console.log('レビューID:', reviewId);
 
+    // レビューの存在確認
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
+    });
+
+    if (!review) {
+      console.error('レビューが見つかりません:', reviewId);
+      return NextResponse.json({ error: 'レビューが見つかりません' }, { status: 404 });
+    }
+
     const session = await getServerSession(authOptions);
+    console.log('セッション情報:', session);
+
     if (!session?.user?.email) {
-      console.error('未認証アクセス');
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
+      // 未ログインの場合はいいねされていない状態を返す
+      return NextResponse.json({ liked: false });
     }
 
     // ユーザー情報の取得
@@ -36,8 +53,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
     }
 
-    console.log('いいね状態確認中:', { userId: user.id, reviewId });
-
     // いいねの確認
     const like = await prisma.like.findUnique({
       where: {
@@ -48,7 +63,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
 
-    console.log('いいね状態:', { exists: !!like });
+    console.log('いいね状態:', !!like);
     return NextResponse.json({ liked: !!like });
   } catch (error) {
     console.error('いいね状態確認エラー:', {
@@ -70,12 +85,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
 // いいねのトグル（追加/削除）
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    console.log('いいねトグルAPI開始');
-
     // Promiseからパラメータを取得
     const p = await context.params;
     const reviewId = p.id;
-    console.log('レビューID:', reviewId);
 
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -103,8 +115,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'レビューが見つかりません' }, { status: 404 });
     }
 
-    console.log('いいね状態確認中:', { userId: user.id, reviewId });
-
     // いいねの確認
     const existingLike = await prisma.like.findUnique({
       where: {
@@ -116,7 +126,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     });
 
     if (existingLike) {
-      console.log('いいね削除処理開始');
       // いいねを削除
       await prisma.like.delete({
         where: {
@@ -130,10 +139,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         data: { likesCount: { decrement: 1 } },
       });
 
-      console.log('いいね削除完了');
       return NextResponse.json({ liked: false });
     } else {
-      console.log('いいね作成処理開始');
       // いいねを作成
       await prisma.like.create({
         data: {
@@ -148,7 +155,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
         data: { likesCount: { increment: 1 } },
       });
 
-      console.log('いいね作成完了');
       return NextResponse.json({ liked: true });
     }
   } catch (error) {

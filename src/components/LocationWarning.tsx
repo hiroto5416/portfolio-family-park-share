@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 
+/**
+ * 位置警告コンポーネントのプロップス
+ */
 interface LocationWarningProps {
   message: string;
   isDefaultLocation: boolean;
 }
 
+/**
+ * 位置警告コンポーネント
+ * @param message 警告メッセージ
+ * @param isDefaultLocation デフォルト位置かどうか
+ * @returns 位置警告コンポーネント
+ */
 export function LocationWarning({ message, isDefaultLocation }: LocationWarningProps) {
   const [isVisible, setIsVisible] = useState(true);
 

@@ -1,4 +1,7 @@
-// Google Places APIのレスポンス型を定義
+
+/**
+ * Google Places APIのレスポンス
+ */
 export interface GooglePlace {
   place_id: string;
   name: string;
@@ -34,7 +37,9 @@ export interface GooglePlace {
   };
 }
 
-// アプリケーション内で使用する公園データの型
+/**
+ * アプリケーション内で使用する公園データの型
+ */
 export interface Park {
   place_id: string;
   name: string;
@@ -58,14 +63,18 @@ export interface Park {
   // その他必要なプロパティ
 }
 
-// 検索結果の型
+/**
+ * 検索結果の型
+ */
 export interface SearchResult {
   parks: Park[];
   total: number;
   nextPageToken?: string;
 }
 
-// 検索パラメータの型
+/**
+ * 検索パラメータの型
+ */
 export interface SearchParams {
   query: string;
   location?: {

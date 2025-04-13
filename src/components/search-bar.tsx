@@ -7,10 +7,17 @@ import { Button } from './ui/button';
 import { useSearchContext } from '@/contexts/SearchContext';
 import { Loader2 } from 'lucide-react';
 
+/**
+ * 検索バーのプロップス
+ */
 interface SearchBarProps {
   size?: 'default' | 'lg';
 }
 
+/**
+ * 検索バー
+ * @param size サイズ
+ */
 export function SearchBar({ size = 'default' }: SearchBarProps) {
   const inputClass = size === 'lg' ? 'h-12 text-lg' : 'h-9';
   const { query, setQuery, search, isLoading, error } = useSearchContext();

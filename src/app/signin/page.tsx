@@ -7,6 +7,10 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 
+/**
+ * サインインページ
+ * @returns サインインページ
+ */
 export default function SignInPage() {
   const [formData, setFormData] = useState({
     name: '',

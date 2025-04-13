@@ -1,5 +1,11 @@
 import { getSession } from 'next-auth/react';
 
+/**
+ * アバターをアップロードする
+ * @param file アップロードするファイル
+ * @param userId ユーザーID
+ * @returns アバターのURL
+ */
 export async function uploadAvatar(file: File, userId: string): Promise<string> {
   try {
     // セッションを取得
@@ -10,8 +16,6 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
 
     // ファイルをBase64に変換
     const fileBase64 = await convertFileToBase64(file);
-
-    console.log('APIリクエスト送信準備:', { fileName: file.name });
 
     // APIエンドポイントにPOSTリクエストを送信
     const response = await fetch('/api/user/upload-avatar', {
@@ -31,7 +35,6 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
     let data;
     try {
       const text = await response.text();
-      console.log('APIレスポンス (生):', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
       data = text ? JSON.parse(text) : {};
     } catch (error) {
       console.error('レスポンス解析エラー:', error);
@@ -47,7 +50,6 @@ export async function uploadAvatar(file: File, userId: string): Promise<string> 
       );
     }
 
-    console.log('アップロード成功:', data.url);
     return data.url;
   } catch (error) {
     console.error('アバターアップロードエラー:', error);

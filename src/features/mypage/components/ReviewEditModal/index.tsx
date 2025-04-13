@@ -7,6 +7,9 @@ import Image from 'next/image';
 import { useState } from 'react';
 import heic2any from 'heic-convert';
 
+/**
+ * レビュー編集モーダーのプロップス
+ */
 interface ReviewEditModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,7 +22,13 @@ interface ReviewEditModalProps {
   onSave: (id: string, content: string, newImages: File[], deletedImageUrls: string[]) => void;
 }
 
-// HEIC画像をJPEGに変換
+/**
+ * レビュー編集モーダー
+ * @param isOpen モーダーが開いているかどうか
+ * @param onClose モーダーを閉じる
+ * @param review レビュー
+ * @param onSave レビューを保存する
+ */
 const convertHeicToJpeg = async (file: File): Promise<File> => {
   if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
     try {
@@ -41,6 +50,13 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
   return file;
 };
 
+/**
+ * レビュー編集モーダー
+ * @param isOpen モーダーが開いているかどうか
+ * @param onClose モーダーを閉じる
+ * @param review レビュー
+ * @param onSave レビューを保存する
+ */
 export function ReviewEditModal({ isOpen, onClose, review, onSave }: ReviewEditModalProps) {
   const [content, setContent] = useState(review.content);
   const [charCount, setCharCount] = useState(review.content.length);

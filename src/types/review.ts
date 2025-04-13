@@ -1,3 +1,7 @@
+
+/**
+ * レビュー
+ */
 export interface Review {
   id: string;
   parkName: string;
@@ -7,11 +11,17 @@ export interface Review {
   images: string[];
 }
 
+/**
+ * レビューフォームデータ
+ */
 export interface ReviewFormData {
   content: string;
   images: File[];
 }
 
+/**
+ * レビューリストのプロップス
+ */
 export interface ReviewListProps {
   reviews: Review[];
   isLoading?: boolean;

@@ -1,14 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-// import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { authOptions } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
+/**
+ * プロフィール更新API
+ * @param request リクエスト
+ * @returns プロフィール更新結果
+ */
 export async function PUT(request: Request) {
-  console.log('===== プロフィール更新API開始 =====');
   try {
     const { name, email } = await request.json();
-    console.log('プロフィール更新リクエスト受信:', { name, email });
 
     // セッション情報を取得
     const session = await getServerSession(authOptions);
@@ -17,11 +19,8 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
     }
 
-    console.log('セッション検証成功:', { currentUserEmail: session.user.email });
-
     // メールアドレスが変更される場合、重複チェック
     if (email && email !== session.user.email) {
-      console.log('メールアドレス変更の検証中:', { newEmail: email });
       const existingUser = await prisma.user.findUnique({
         where: { email },
       });
@@ -49,12 +48,6 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'プロフィールの更新に失敗しました' }, { status: 500 });
     }
 
-    console.log('プロフィール更新成功:', {
-      userId: updatedUser.id,
-      newName: updatedUser.name,
-      newEmail: updatedUser.email,
-    });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('プロフィール更新エラー:', {
@@ -70,7 +63,5 @@ export async function PUT(request: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    console.log('===== プロフィール更新API終了 =====');
   }
 }

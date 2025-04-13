@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { GooglePlace } from '@/types/park';
 
+/**
+ * 近隣公園検索API
+ * @param request リクエスト
+ * @returns 近隣公園のリスト
+ */
 export async function GET(request: Request) {
-  console.log('近隣公園検索API開始');
 
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get('lat');
   const lng = searchParams.get('lng');
 
-  console.log('検索パラメータ:', { lat, lng });
 
   if (!lat || !lng) {
     console.error('必須パラメータ不足:', { lat, lng });
@@ -30,7 +33,6 @@ export async function GET(request: Request) {
       `language=ja&` +
       `key=${apiKey}`;
 
-    console.log('Google Places API リクエスト開始');
     const response = await fetch(url);
     const data = await response.json();
 
@@ -60,7 +62,6 @@ export async function GET(request: Request) {
         })) || [],
     }));
 
-    console.log(`検索結果: ${parks.length}件の公園が見つかりました`);
 
     return NextResponse.json({ parks: parks.slice(0, 5) });
   } catch (error) {

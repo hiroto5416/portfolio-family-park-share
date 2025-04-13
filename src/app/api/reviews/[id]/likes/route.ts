@@ -23,7 +23,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Promiseからパラメータを取得
     const p = await context.params;
     const reviewId = p.id;
-    console.log('レビューID:', reviewId);
 
     // レビューの存在確認
     const review = await prisma.review.findUnique({
@@ -36,7 +35,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     const session = await getServerSession(authOptions);
-    console.log('セッション情報:', session);
 
     if (!session?.user?.email) {
       // 未ログインの場合はいいねされていない状態を返す
@@ -63,7 +61,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
       },
     });
 
-    console.log('いいね状態:', !!like);
     return NextResponse.json({ liked: !!like });
   } catch (error) {
     console.error('いいね状態確認エラー:', {

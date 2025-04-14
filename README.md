@@ -37,6 +37,7 @@
 
   - Prisma
   - Supabase
+  - NextAuth.js
 
 - 外部API
   - Google Maps API
@@ -83,6 +84,8 @@ cp .env.example .env.local
 - NEXT_PUBLIC_SUPABASE_URL
 - NEXT_PUBLIC_SUPABASE_ANON_KEY
 - DATABASE_URL
+- NEXTAUTH_SECRET
+- NEXTAUTH_URL
 
 5. データベースのマイグレーション
 
@@ -113,6 +116,8 @@ npm run dev
 | NEXT_PUBLIC_SUPABASE_URL        | SupabaseプロジェクトのURL    | Supabaseプロジェクト設定から取得                                  |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY   | Supabase匿名キー             | Supabaseプロジェクト設定から取得                                  |
 | DATABASE_URL                    | PostgreSQLデータベースのURL  | Supabaseプロジェクト設定から取得                                  |
+| NEXTAUTH_SECRET                 | NextAuthのセキュリティキー   | 任意の文字列を生成（推奨：`openssl rand -base64 32`）             |
+| NEXTAUTH_URL                    | NextAuthのベースURL          | 開発環境では`http://localhost:3000`を設定                         |
 
 ## 🔒 Google Maps APIの設定
 

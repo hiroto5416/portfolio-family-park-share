@@ -5,7 +5,6 @@ import React from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useSearchContext } from '@/contexts/SearchContext';
-import { Loader2 } from 'lucide-react';
 
 /**
  * 検索バーのプロップス
@@ -20,7 +19,7 @@ interface SearchBarProps {
  */
 export function SearchBar({ size = 'default' }: SearchBarProps) {
   const inputClass = size === 'lg' ? 'h-12 text-lg' : 'h-9';
-  const { query, setQuery, search, isLoading, error } = useSearchContext();
+  const { query, setQuery, search, error } = useSearchContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,9 +45,6 @@ export function SearchBar({ size = 'default' }: SearchBarProps) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        {isLoading && (
-          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 animate-spin text-gray-400" />
-        )}
       </div>
       <Button type="submit" className="w-full md:w-auto">
         検索

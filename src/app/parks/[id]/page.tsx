@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ReviewCreateModal } from '@/features/park/components/ReviewCreateModal';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const REVIEWS_PER_PAGE = 5;
 
@@ -142,8 +143,63 @@ export default function ParkDetailPage() {
   // ローディング状態の表示
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">読み込み中...</div>
+      <div className="container max-w-5xl mx-auto py-8 px-4">
+        {/* スケルトンローダー: タイトル */}
+        <Skeleton className="h-10 w-1/3 mb-6" />
+
+        {/* スケルトンローダー: 上部セクション */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* 左側: 公園写真スケルトン */}
+          <div className="order-1 md:order-1">
+            <Card className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Skeleton className="h-5 w-5" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <div className="flex justify-center">
+                <Skeleton className="aspect-[4/3] h-[250px] w-full rounded-md" />
+              </div>
+            </Card>
+          </div>
+
+          {/* 右側: 公園情報スケルトン */}
+          <div className="order-2 md:order-2 h-full">
+            <Card className="p-6">
+              <Skeleton className="h-6 w-1/3 mb-4" />
+              <Skeleton className="h-5 w-full mb-2" />
+              <Skeleton className="h-5 w-4/5 mb-2" />
+              <Skeleton className="h-5 w-2/3 mb-2" />
+              <Skeleton className="h-5 w-3/4 mb-2" />
+              <Skeleton className="h-5 w-full mb-2" />
+            </Card>
+          </div>
+        </div>
+
+        {/* スケルトンローダー: レビューセクション */}
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-9 w-32" />
+          </div>
+
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-11/12 mb-2" />
+                <Skeleton className="h-4 w-4/5 mb-4" />
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -284,7 +340,7 @@ export default function ParkDetailPage() {
                     id={review.id}
                     name={review.users.name}
                     content={review.content}
-                    date={review.created_at}
+                    date={new Date(review.created_at).toLocaleDateString('ja-JP')}
                     images={review.review_images.map((img) => img.image_url)}
                     likes={review.likes_count}
                     image={review.users.image}

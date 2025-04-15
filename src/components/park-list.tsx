@@ -6,6 +6,7 @@ import { Park } from '@/types/park';
 import Link from 'next/link';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { LocationWarning } from '@/components/LocationWarning';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // 画像ローダーを定義することで、外部URLでもNext.js Imageコンポーネントを使用できるようにする
 const googlePlacesLoader = ({ src, width }: { src: string; width: number }) => {
@@ -53,7 +54,20 @@ export function ParkList() {
   };
 
   if (loading) {
-    return <div className="text-center py-4">読み込み中...</div>;
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-start space-x-4 p-4 bg-white">
+            <Skeleton className="h-16 w-16 rounded-md" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (

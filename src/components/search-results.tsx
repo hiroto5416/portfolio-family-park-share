@@ -5,6 +5,7 @@ import { Park } from '../types/park';
 import { Card } from './ui/card';
 import { MapPin, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * 検索結果のプロップス
@@ -24,8 +25,30 @@ interface SearchResultsProps {
 export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Card key={index} className="p-4">
+            {/* 画像のスケルトン */}
+            <Skeleton className="w-full h-48 rounded-md mb-4" />
+            {/* タイトルのスケルトン */}
+            <Skeleton className="h-6 w-3/4 mb-4" />
+            {/* 情報行のスケルトン */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-4 h-4" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-4 h-4" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Skeleton className="w-4 h-4" />
+                <Skeleton className="h-4 w-1/3" />
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }

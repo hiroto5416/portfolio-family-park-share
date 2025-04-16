@@ -146,3 +146,15 @@ npm run dev
 - [Supabase](https://supabase.com/)
 - [Google Maps Platform](https://developers.google.com/maps)
 - [shadcn/ui](https://ui.shadcn.com/)
+
+## 📊 データベース設計
+
+データベース設計の詳細は以下のURLで確認できます：
+
+[Notion DB設計書](https://www.notion.so/_DB-18b1bbc106cd800090a6f39f3acafdf5?pvs=4)
+
+## 🎨 ワイヤーフレーム
+
+ワイヤーフレームは以下のURLで確認できます：
+
+[Figma ワイヤーフレーム](https://www.figma.com/design/9kGi4tDSyRVyiGT1DUuzLA/%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%83%91%E3%83%BC%E3%82%AF%E3%82%B7%E3%82%A7%E3%82%A2_%E3%83%AF%E3%82%A4%E3%83%A4%E3%83%BC%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0?node-id=0-1&t=HuneFNYA8SXOZ9lc-1)

@@ -10,6 +10,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       id: string;
+      avatarUrl?: string | null;
     } & DefaultSession['user'];
   }
 }
@@ -63,12 +64,26 @@ export const authOptions: AuthOptions = {
     signIn: '/login',
   },
   callbacks: {
-    session: ({ session, token }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub,
-      },
-    }),
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        // ユーザーIDをセッションに追加
+        session.user.id = token.sub;
+
+        // データベースからユーザー情報を取得してavatarUrlを追加
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { avatarUrl: true },
+          });
+
+          if (user?.avatarUrl) {
+            session.user.avatarUrl = user.avatarUrl;
+          }
+        } catch (error) {
+          console.error('Failed to fetch user avatarUrl for session:', error);
+        }
+      }
+      return session;
+    },
   },
 };

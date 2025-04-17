@@ -8,6 +8,7 @@ import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
 
 /**
  * ヘッダー
@@ -24,6 +25,9 @@ export function Header() {
   const handleLogout = async () => {
     await signOut({ redirect: true, callbackUrl: '/' });
   };
+
+  // ユーザーのアバター画像URL - セッションから取得
+  const avatarUrl = session?.user?.avatarUrl || session?.user?.image;
 
   return (
     <header
@@ -49,8 +53,14 @@ export function Header() {
               <>
                 <Link href="/mypage">
                   <Button variant="ghost" size="sm" className="text-primary hover:text-primary/90">
-                    <User className="mr-1 h-5 w-5" />
-                    マイページ
+                    {avatarUrl ? (
+                      <div className="mr-1 h-7 w-7 relative overflow-hidden rounded-full border-2 border-gray-300">
+                        <Image src={avatarUrl} alt="プロフィール" fill className="object-cover" />
+                      </div>
+                    ) : (
+                      <User className="mr-1 h-6 w-6" />
+                    )}
+                    <span className="font-bold">マイページ</span>
                   </Button>
                 </Link>
                 <Button variant="default" size="sm" onClick={handleLogout}>
@@ -88,8 +98,14 @@ export function Header() {
                   variant="ghost"
                   className="text-xs h-6 px-2 text-primary hover:text-primary/90"
                 >
-                  <User className="mr-1 h-3 w-3" />
-                  マイページ
+                  {avatarUrl ? (
+                    <div className="mr-1 h-5 w-5 relative overflow-hidden rounded-full border border-gray-300">
+                      <Image src={avatarUrl} alt="プロフィール" fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <User className="mr-1 h-4 w-4" />
+                  )}
+                  <span className="font-bold">マイページ</span>
                 </Button>
               </Link>
               <Button variant="default" className="text-xs h-6 px-2" onClick={handleLogout}>

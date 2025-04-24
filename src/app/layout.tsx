@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { AuthProvider } from '@/providers/auth-provider';
 import { SearchProvider } from '@/contexts/SearchContext';
+import IntroModalProvider from '@/components/IntroModalProvider';
 
 /**
  * メタデータ
@@ -36,9 +37,11 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col">
         <AuthProvider>
           <SearchProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
+            <IntroModalProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </IntroModalProvider>
           </SearchProvider>
         </AuthProvider>
       </body>

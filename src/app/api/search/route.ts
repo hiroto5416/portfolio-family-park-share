@@ -29,6 +29,12 @@ export async function GET(request: Request) {
     const response = await fetch(url);
     const data = await response.json();
 
+    // ZERO_RESULTS の場合はエラーではなく空の結果として処理
+    if (data.status === 'ZERO_RESULTS') {
+      console.log('検索結果が0件です:', { query });
+      return NextResponse.json({ results: [], total: 0 });
+    }
+
     if (data.status !== 'OK') {
       console.error('Google Places APIエラー:', {
         status: data.status,
@@ -43,7 +49,7 @@ export async function GET(request: Request) {
     // データの存在確認を追加
     if (!data.results || !Array.isArray(data.results)) {
       console.error('不正なレスポンス形式:', data);
-      return NextResponse.json({ parks: [], total: 0 }, { status: 200 });
+      return NextResponse.json({ results: [], total: 0 }, { status: 200 });
     }
 
     // 検索結果を変換

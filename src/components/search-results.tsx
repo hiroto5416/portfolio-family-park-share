@@ -6,6 +6,7 @@ import { Card } from './ui/card';
 import { MapPin, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ERROR_MESSAGES } from '@/utils/errors';
 
 /**
  * 検索結果のプロップス
@@ -14,6 +15,7 @@ interface SearchResultsProps {
   parks: Park[];
   isLoading: boolean;
   error: string | null;
+  hasSearched: boolean;
 }
 
 /**
@@ -21,8 +23,9 @@ interface SearchResultsProps {
  * @param parks 公園リスト
  * @param isLoading ローディング状態
  * @param error エラー
+ * @param hasSearched 検索実行済みフラグ
  */
-export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
+export function SearchResults({ parks, isLoading, error, hasSearched }: SearchResultsProps) {
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -61,12 +64,16 @@ export function SearchResults({ parks, isLoading, error }: SearchResultsProps) {
     );
   }
 
-  if (parks.length === 0) {
+  if (hasSearched && parks.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>検索結果が見つかりませんでした</p>
+        <p>{ERROR_MESSAGES.NO_RESULTS}</p>
       </div>
     );
+  }
+
+  if (!hasSearched) {
+    return null;
   }
 
   return (

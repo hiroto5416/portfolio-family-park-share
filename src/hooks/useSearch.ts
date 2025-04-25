@@ -13,6 +13,7 @@ interface SearchState {
   results: Park[]; // 検索結果
   error: string | null; // エラーメッセージ
   total: number;
+  hasSearched: boolean; // 検索実行済みフラグ
 }
 
 /**
@@ -26,6 +27,7 @@ export function useSearch() {
     results: [],
     error: null,
     total: 0,
+    hasSearched: false,
   });
 
   // 検索実行
@@ -40,12 +42,14 @@ export function useSearch() {
         results: result.parks,
         total: result.total,
         isLoading: false,
+        hasSearched: true,
       }));
     } catch (error) {
       setState((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : '検索に失敗しました',
         isLoading: false,
+        hasSearched: true,
       }));
     }
   }, []);
@@ -61,12 +65,14 @@ export function useSearch() {
         results: result.parks,
         total: result.total,
         isLoading: false,
+        hasSearched: true,
       }));
     } catch (error) {
       setState((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : '検索に失敗しました',
         isLoading: false,
+        hasSearched: true,
       }));
     }
   }, []);
@@ -84,6 +90,7 @@ export function useSearch() {
       results: [],
       error: null,
       total: 0,
+      hasSearched: false,
     });
   }, []);
 

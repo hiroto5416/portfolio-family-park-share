@@ -13,6 +13,7 @@ interface SearchContextType {
   results: Park[];
   error: string | null;
   total: number;
+  hasSearched: boolean; // 検索実行済みフラグ
   search: (params: SearchParams) => Promise<void>;
   searchByLocation: (lat: number, lng: number) => Promise<void>;
   setQuery: (query: string) => void;

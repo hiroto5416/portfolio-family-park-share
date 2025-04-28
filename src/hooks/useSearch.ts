@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { parkSearchService } from '../services/parkSearchService';
 import { Park, SearchParams } from '../types/park';
+import { ERROR_CODES, handleError } from '../utils/errors';
 
 /**
  * 検索状態
@@ -12,6 +13,7 @@ interface SearchState {
   isLoading: boolean; // 検索中状態
   results: Park[]; // 検索結果
   error: string | null; // エラーメッセージ
+  errorCode: keyof typeof ERROR_CODES | null; // エラーコード
   total: number;
   hasSearched: boolean; // 検索実行済みフラグ
 }
@@ -26,13 +28,14 @@ export function useSearch() {
     isLoading: false,
     results: [],
     error: null,
+    errorCode: null,
     total: 0,
     hasSearched: false,
   });
 
   // 検索実行
   const search = useCallback(async (params: SearchParams) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    setState((prev) => ({ ...prev, isLoading: true, error: null, errorCode: null }));
 
     try {
       const result = await parkSearchService.searchByText(params);
@@ -43,20 +46,29 @@ export function useSearch() {
         total: result.total,
         isLoading: false,
         hasSearched: true,
+        error: null,
+        errorCode: null,
       }));
     } catch (error) {
+      // エラー処理
+      const { code, message } = handleError(error);
+      console.error('検索エラー:', message, code);
+
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error.message : '検索に失敗しました',
+        error: message,
+        errorCode: code,
         isLoading: false,
         hasSearched: true,
+        // NO_RESULTSの場合は空の結果を設定、それ以外は結果をクリア
+        results: code === 'NO_RESULTS' ? [] : [],
       }));
     }
   }, []);
 
   // 位置情報による検索
   const searchByLocation = useCallback(async (lat: number, lng: number) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    setState((prev) => ({ ...prev, isLoading: true, error: null, errorCode: null }));
 
     try {
       const result = await parkSearchService.searchByLocation(lat, lng);
@@ -66,13 +78,22 @@ export function useSearch() {
         total: result.total,
         isLoading: false,
         hasSearched: true,
+        error: null,
+        errorCode: null,
       }));
     } catch (error) {
+      // エラー処理
+      const { code, message } = handleError(error);
+      console.error('位置情報検索エラー:', message, code);
+
       setState((prev) => ({
         ...prev,
-        error: error instanceof Error ? error.message : '検索に失敗しました',
+        error: message,
+        errorCode: code,
         isLoading: false,
         hasSearched: true,
+        // NO_RESULTSの場合は空の結果を設定、それ以外は結果をクリア
+        results: code === 'NO_RESULTS' ? [] : [],
       }));
     }
   }, []);
@@ -89,6 +110,7 @@ export function useSearch() {
       isLoading: false,
       results: [],
       error: null,
+      errorCode: null,
       total: 0,
       hasSearched: false,
     });

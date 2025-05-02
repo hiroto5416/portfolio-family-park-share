@@ -6,7 +6,8 @@ import { Card } from './ui/card';
 import { MapPin, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ERROR_MESSAGES } from '@/utils/errors';
+import { ERROR_CODES } from '@/utils/errors';
+import { ErrorMessage } from '@/components/ui/error-message';
 
 /**
  * 検索結果のプロップス
@@ -15,6 +16,7 @@ interface SearchResultsProps {
   parks: Park[];
   isLoading: boolean;
   error: string | null;
+  errorCode?: keyof typeof ERROR_CODES | null;
   hasSearched: boolean;
 }
 
@@ -23,9 +25,16 @@ interface SearchResultsProps {
  * @param parks 公園リスト
  * @param isLoading ローディング状態
  * @param error エラー
+ * @param errorCode エラーコード
  * @param hasSearched 検索実行済みフラグ
  */
-export function SearchResults({ parks, isLoading, error, hasSearched }: SearchResultsProps) {
+export function SearchResults({
+  parks,
+  isLoading,
+  error,
+  errorCode = null,
+  hasSearched,
+}: SearchResultsProps) {
   if (isLoading) {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -58,16 +67,16 @@ export function SearchResults({ parks, isLoading, error, hasSearched }: SearchRe
 
   if (error) {
     return (
-      <div className="text-center py-8 text-red-500">
-        <p>エラー: {error}</p>
+      <div className="py-8">
+        <ErrorMessage code={errorCode || undefined} message={error} />
       </div>
     );
   }
 
   if (hasSearched && parks.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <p>{ERROR_MESSAGES.NO_RESULTS}</p>
+      <div className="py-8">
+        <ErrorMessage code="NO_RESULTS" message="検索結果が見つかりませんでした" variant="info" />
       </div>
     );
   }

@@ -3,6 +3,7 @@
 import { createContext, useContext } from 'react';
 import { useSearch } from '@/hooks/useSearch';
 import { Park, SearchParams } from '@/types/park';
+import { ERROR_CODES } from '@/utils/errors';
 
 /**
  * 検索コンテキストの型
@@ -12,6 +13,7 @@ interface SearchContextType {
   isLoading: boolean;
   results: Park[];
   error: string | null;
+  errorCode: keyof typeof ERROR_CODES | null;
   total: number;
   hasSearched: boolean; // 検索実行済みフラグ
   search: (params: SearchParams) => Promise<void>;

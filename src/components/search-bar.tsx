@@ -5,9 +5,7 @@ import React from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useSearchContext } from '@/contexts/SearchContext';
-import { ERROR_MESSAGES } from '@/utils/errors';
-import { Card, CardContent } from './ui/card';
-import { InfoIcon } from 'lucide-react';
+import { ErrorMessage } from '@/components/ui/error-message';
 
 /**
  * 検索バーのプロップス
@@ -22,7 +20,7 @@ interface SearchBarProps {
  */
 export function SearchBar({ size = 'default' }: SearchBarProps) {
   const inputClass = size === 'lg' ? 'h-12 text-lg' : 'h-9';
-  const { query, setQuery, search, error, results, hasSearched } = useSearchContext();
+  const { query, setQuery, search, error, errorCode, results, hasSearched } = useSearchContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,21 +54,22 @@ export function SearchBar({ size = 'default' }: SearchBarProps) {
       </div>
 
       {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="p-4 text-red-600 flex items-center gap-2">
-            <InfoIcon className="h-5 w-5" />
-            <p>{error}</p>
-          </CardContent>
-        </Card>
+        <ErrorMessage
+          code={errorCode || undefined}
+          message={error}
+          action={
+            error &&
+            errorCode === 'NETWORK_ERROR' && (
+              <Button size="sm" variant="outline" onClick={() => search({ query: query.trim() })}>
+                再試行
+              </Button>
+            )
+          }
+        />
       )}
 
       {!error && hasSearched && results.length === 0 && (
-        <Card className="border-gray-200 bg-gray-50">
-          <CardContent className="p-4 text-gray-600 flex items-center gap-2">
-            <InfoIcon className="h-5 w-5" />
-            <p>{ERROR_MESSAGES.NO_RESULTS}</p>
-          </CardContent>
-        </Card>
+        <ErrorMessage code="NO_RESULTS" message="検索結果が見つかりませんでした" variant="info" />
       )}
     </form>
   );

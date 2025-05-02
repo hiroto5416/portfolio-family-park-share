@@ -7,11 +7,6 @@ import { createClient } from '@supabase/supabase-js';
 // dotenv.config({ path: join(__dirname, '../../.env.local') });
 dotenv.config({ path: join(__dirname, '../../.env') });
 
-// 環境変数を確認するデバッグコード
-console.log('環境変数の読み込み状況:');
-console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '設定済み' : '未設定');
-console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '設定済み (値の長さ: ' + process.env.SUPABASE_SERVICE_ROLE_KEY.length + ')' : '未設定');
-
 // Supabaseクライアントの初期化
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
